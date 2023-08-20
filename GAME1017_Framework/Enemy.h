@@ -21,7 +21,8 @@ public:
 	// Action methods. Fill in for lab.
 	void Idle();
 	void Patrol();
-	void Attack() {}
+	void MoveToRange();
+	void Attack();
 	bool CheckCollision(const double dX, const double dY);
 	bool GetDir() { return m_dir; }
 	int GetHealth() { return m_health; }
@@ -63,25 +64,20 @@ class CloseCombatEnemy : public Enemy
 {
 public:
 	CloseCombatEnemy(SDL_Rect s, SDL_FRect d, TiledLevel* level, int startingpath);
-	//void Update();
-
 private:
-	//void BuildTree() override;
 	void BuildTree();
 };
+
+class RangedCombatEnemy : public Enemy
+{
+public:
+	RangedCombatEnemy(SDL_Rect s, SDL_FRect d, TiledLevel* level, int startingpath);
+
+private:
+	void BuildTree();
+};
+
 #endif
-
-
-//class RangedCombatEnemy : public Enemy
-//{
-//public:
-//	RangedCombatEnemy(SDL_Rect s, SDL_FRect d, TiledLevel* level, int startingpath);
-//	void Update() override;
-//
-//private:
-//	void BuildTree() override;
-//};
-//
 //RangedCombatEnemy::RangedCombatEnemy(SDL_Rect s, SDL_FRect d, TiledLevel* level, int startingpath)
 //	: Enemy(s, d, level, startingpath)
 //{

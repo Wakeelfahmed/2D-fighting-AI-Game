@@ -14,7 +14,8 @@
 #include "IdleCondition.h"
 #include "IdleAction.h"
 #include "PatrolAction.h"
-#include "MoveToPlayerAction.h"
+//#include "MoveToPlayerAction.h"
+#include "MoveToRangeAction.h"
 #include "AttackAction.h"
 #define SPEED 2.0
 #include<iostream>
@@ -176,6 +177,21 @@ void Enemy::Idle()
 	{
 		SetActionState(ActionState::IDLE_STATE);
 		SetAnimation(AnimState::STATE_IDLING, 1, 0, 1, 0);
+	}
+}
+void Enemy::Attack() {
+	if (GetActionState() != ActionState::ATTACK_STATE) // If current action is not idle
+	{
+		SetActionState(ActionState::ATTACK_STATE);
+		SetAnimation(AnimState::STATE_ATTACK, 4, 1, 4, 128);
+	}
+}
+void Enemy::MoveToRange() {
+	//std::cout << "Move to range\n";
+	if (GetActionState() != ActionState::PATROL_STATE) // If current action is not idle
+	{
+		SetActionState(ActionState::PATROL_STATE);
+		SetAnimation(AnimState::STATE_RUNNING, 8, 1, 8, 0);
 	}
 }
 void Enemy::Patrol()
@@ -341,11 +357,6 @@ void CloseCombatEnemy::BuildTree()
 	TreeNode* idleAction = m_tree->AddNode(idleCondition, new IdleAction(this), TreeNodeType::LEFT_TREE_NODE);
 	m_tree->GetNodes().push_back(idleAction);
 
-	//// Add right action node (PatrolAction)
-	//TreeNode* patrolAction = m_tree->AddNode(idleCondition, new PatrolAction(this), TreeNodeType::RIGHT_TREE_NODE);
-	//m_tree->GetNodes().push_back(patrolAction);
-
-
 	// Create and add root node (Player Detected?)		//NOW RIGHT OF IDLE
 	DetectCondition* playerDetectedCondition = new DetectCondition();
 	m_tree->SetDetectNode(playerDetectedCondition);
@@ -363,7 +374,7 @@ void CloseCombatEnemy::BuildTree()
 	m_tree->GetNodes().push_back(withinRangeCondition);
 
 	// Add right action node (Move to Player)
-	TreeNode* moveToPlayerAction = m_tree->AddNode(withinRangeCondition, new MoveToPlayerAction(this), TreeNodeType::RIGHT_TREE_NODE);
+	TreeNode* moveToPlayerAction = m_tree->AddNode(withinRangeCondition, new MoveToRangeAction(this), TreeNodeType::RIGHT_TREE_NODE);
 	m_tree->GetNodes().push_back(moveToPlayerAction);
 
 	// Add left condition node (Has LOS?)
@@ -373,108 +384,27 @@ void CloseCombatEnemy::BuildTree()
 	m_tree->GetNodes().push_back(hasLOSCondition);
 
 	// Add right action node (Move to Player)
-	TreeNode* moveToPlayerAction2 = m_tree->AddNode(hasLOSCondition, new MoveToPlayerAction(this), TreeNodeType::RIGHT_TREE_NODE);
+	TreeNode* moveToPlayerAction2 = m_tree->AddNode(hasLOSCondition, new MoveToRangeAction(this), TreeNodeType::RIGHT_TREE_NODE);
 	m_tree->GetNodes().push_back(moveToPlayerAction2);
 
 	// Add left action node (Attack)
 	TreeNode* attackAction = m_tree->AddNode(hasLOSCondition, new AttackAction(this), TreeNodeType::LEFT_TREE_NODE);
 	m_tree->GetNodes().push_back(attackAction);
 
-
-	// Create and add root node (IdleCondition)
-	//IdleCondition* idleCondition = new IdleCondition();
-	//m_tree->SetIdleNode(idleCondition);
-	//m_tree->GetNodes().push_back(idleCondition);
-
-	//// Add left action node (IdleAction)
-	//TreeNode* idleAction = m_tree->AddNode(idleCondition, new IdleAction(this), TreeNodeType::LEFT_TREE_NODE);
-	//m_tree->GetNodes().push_back(idleAction);
-
-	//// Add right action node (PatrolAction)
-	//TreeNode* patrolAction = m_tree->AddNode(idleCondition, new PatrolAction(this), TreeNodeType::RIGHT_TREE_NODE);
-	//m_tree->GetNodes().push_back(patrolAction);
-
-	//// Add right condition node (DetectCondition)
-	//DetectCondition* detectCondition = new DetectCondition();
-	//m_tree->SetDetectNode(detectCondition);
-	//m_tree->GetNodes().push_back(detectCondition);
-
-	//// Add left action node (PatrolAction)
-	//TreeNode* patrolAction1 = m_tree->AddNode(patrolAction, new PatrolAction(this), TreeNodeType::LEFT_TREE_NODE);
-	//m_tree->GetNodes().push_back(patrolAction1);
-
-	//// Add right condition node (RangeCondition)
-	//RangeCondition* withinRangeCondition = new RangeCondition();
-	//m_tree->SetRangeNode(withinRangeCondition);
-	//m_tree->GetNodes().push_back(withinRangeCondition);
-
-	//// Add left action node (Move to Player)
-	//TreeNode* moveToPlayerAction = m_tree->AddNode(withinRangeCondition, new MoveToPlayerAction(this), TreeNodeType::LEFT_TREE_NODE);
-	//m_tree->GetNodes().push_back(moveToPlayerAction);
-
-	//// Add right condition node (LOSCondition)
-	//LOSCondition* hasLOSCondition = new LOSCondition();
-	//m_tree->SetLOSNode(hasLOSCondition);
-	//m_tree->GetNodes().push_back(hasLOSCondition);
-
-	//// Add left action node (Move to Player)
-	//TreeNode* moveToPlayerAction2 = m_tree->AddNode(hasLOSCondition, new MoveToPlayerAction(this), TreeNodeType::LEFT_TREE_NODE);
-	//m_tree->GetNodes().push_back(moveToPlayerAction2);
-
-	//// Add right action node (AttackAction)
-	//TreeNode* attackAction = m_tree->AddNode(hasLOSCondition, new AttackAction(this), TreeNodeType::RIGHT_TREE_NODE);
-	//m_tree->GetNodes().push_back(attackAction);
-
-	m_tree->Display();
-
-
-
-
-
-	//IdleCondition* idleCondition = new IdleCondition();
-	//m_tree->SetIdleNode(idleCondition);
-	//m_tree->GetNodes().push_back(idleCondition);
-
-	//// Add left action.
-	//TreeNode* idleAction = m_tree->AddNode(idleCondition, new IdleAction(this), TreeNodeType::LEFT_TREE_NODE);
-	//m_tree->GetNodes().push_back(idleAction);
-
-	//// Add right action.
-	//TreeNode* patrolAction = m_tree->AddNode(idleCondition, new PatrolAction(this), TreeNodeType::RIGHT_TREE_NODE);
-	//m_tree->GetNodes().push_back(patrolAction);
-
-	//// Create and add root node (Player Detected?)
-	//DetectCondition* playerDetectedCondition = new DetectCondition();
-	//m_tree->SetDetectNode(playerDetectedCondition);
-	//m_tree->GetNodes().push_back(playerDetectedCondition);
-
-	//// Add left action node (Patrol)
-	//TreeNode* patrolAction1 = m_tree->AddNode(playerDetectedCondition, new PatrolAction(this), TreeNodeType::LEFT_TREE_NODE);
-	//m_tree->GetNodes().push_back(patrolAction1);
-
-	//// Add right condition node (Within Range?)
-	//RangeCondition* withinRangeCondition = new RangeCondition();
-	//m_tree->SetRangeNode(withinRangeCondition);
-	//m_tree->GetNodes().push_back(withinRangeCondition);
-
-	//// Add left action node (Move to Player)
-	//TreeNode* moveToPlayerAction = m_tree->AddNode(withinRangeCondition, new MoveToPlayerAction(this), TreeNodeType::LEFT_TREE_NODE);
-	//m_tree->GetNodes().push_back(moveToPlayerAction);
-
-	//// Add right condition node (Has LOS?)
-	//LOSCondition* hasLOSCondition = new LOSCondition();
-	//m_tree->SetLOSNode(hasLOSCondition);
-	//m_tree->GetNodes().push_back(hasLOSCondition);
-
-	//// Add left action node (Move to Player)
-	//TreeNode* moveToPlayerAction2 = m_tree->AddNode(hasLOSCondition, new MoveToPlayerAction(this), TreeNodeType::LEFT_TREE_NODE);
-	//m_tree->GetNodes().push_back(moveToPlayerAction2);
-
-	//// Add right action node (Attack)
-	//TreeNode* attackAction = m_tree->AddNode(hasLOSCondition, new AttackAction(this), TreeNodeType::RIGHT_TREE_NODE);
-	//m_tree->GetNodes().push_back(attackAction);
 }
 
+RangedCombatEnemy::RangedCombatEnemy(SDL_Rect s, SDL_FRect d, TiledLevel* level, int startingpath)
+	: Enemy(s, d, level, startingpath)
+{
+	m_tree = new DecisionTree(this);
+	BuildTree();
+	//Set initial idling state in tree.
+	//GetTree()->GetIdleNode()->SetIsIdle(true);
+	SetAnimation(AnimState::STATE_IDLING, 1, 0, 1, 0);
+}
+void RangedCombatEnemy::BuildTree()
+{
+}
 //class RangedCombatEnemy : public Enemy
 //{
 //public:
@@ -528,3 +458,4 @@ void CloseCombatEnemy::BuildTree()
 //	TreeNode* patrolAction = m_tree->AddNode(idleCondition, new PatrolAction(this), TreeNodeType::RIGHT_TREE_NODE);
 //	m_tree->GetNodes().push_back(patrolAction);
 //}
+

@@ -13,14 +13,24 @@ public:
 	void Update(bool withinrange) {}
 	void Render();
 	bool GetDir() { return m_dir; }
+	void Take_Damage() {
+		bool static already_detected = false;
+		if (m_health > 0 && already_detected == false) {
+			m_health -= 1;
+			already_detected = true;
+		}
+		else if (already_detected) {
+			already_detected = false;
+		}
+
+	}
 private:
+	int m_health;
 	bool m_dir;
 	TiledLevel* m_level;
 	SDL_FRect m_healthDst;
 	SDL_FRect m_curHealthDst;
-	int m_health;
 	bool CheckCollision(const int dX, const int dY);
-	void Take_Damage() { m_health -= 5; }
 };
 
 #endif

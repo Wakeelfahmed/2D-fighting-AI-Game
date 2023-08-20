@@ -30,19 +30,29 @@ void State::Update()
 				if (MAMA::Distance(GetChild("enemy1")->GetCenter(), GetChild("player")->GetCenter()) <= 30.0 &&
 					MAMA::Rad2Deg(MAMA::AngleBetweenPoints(GetChild("player")->GetCenter().y - GetChild("enemy1")->GetCenter().y, GetChild("player")->GetCenter().x - GetChild("enemy1")->GetCenter().x)) < 180)
 				{
-					i.second->GetCenter();
 					cout << "Close range\n";
 					i.second->Update(true);
+					const std::string& key = m_objects[1].first;
+					GameObject* object = m_objects[1].second;
+
+					if (key == "player") {
+						Player* player = dynamic_cast<Player*>(object);
+						if (player) {
+							// Player-specific logic
+							// For example:
+							player->Take_Damage();
+						}
+					}
 				}
 				else
 					i.second->Update(false);
 			}
 		}
 		else if (i.first == "enemy2") {
-			if (GetChild("enemy1") != nullptr)
+			if (GetChild("enemy2") != nullptr)
 			{
-				if (MAMA::Distance(GetChild("enemy1")->GetCenter(), GetChild("player")->GetCenter()) <= 30.0 &&
-					MAMA::Rad2Deg(MAMA::AngleBetweenPoints(GetChild("player")->GetCenter().y - GetChild("enemy1")->GetCenter().y, GetChild("player")->GetCenter().x - GetChild("enemy1")->GetCenter().x)) < 180)
+				if (MAMA::Distance(GetChild("enemy2")->GetCenter(), GetChild("player")->GetCenter()) <= 30.0 &&
+					MAMA::Rad2Deg(MAMA::AngleBetweenPoints(GetChild("player")->GetCenter().y - GetChild("enemy2")->GetCenter().y, GetChild("player")->GetCenter().x - GetChild("enemy2")->GetCenter().x)) < 180)
 				{
 					i.second->GetCenter();
 					cout << "Close range\n";
@@ -66,7 +76,6 @@ void State::Render()
 		return; // If GameState is rendering but PauseState is the current state, return.
 	SDL_RenderPresent(REMA::GetRenderer());
 }
-
 void State::Exit()
 {
 	for (auto& i : m_objects)
@@ -77,12 +86,10 @@ void State::Exit()
 	m_objects.clear();
 	m_objects.shrink_to_fit();
 }
-
 void State::AddChild(std::string key, GameObject* object)
 {
 	m_objects.push_back(pair<string, GameObject*>(key, object));
 }
-
 GameObject* State::GetChild(const std::string& key)
 {
 	auto it = std::find_if(m_objects.begin(), m_objects.end(),
@@ -128,7 +135,6 @@ void State::RemoveChild(const std::string& key)
 
 // Begin TitleState.
 TitleState::TitleState() = default;
-
 void TitleState::Enter()
 {
 	cout << "Entering TitleState..." << endl;
@@ -141,7 +147,6 @@ void TitleState::Enter()
 	SOMA::AllocateChannels(16);
 	SOMA::SetMusicVolume(32);
 }
-
 void TitleState::Update()
 {
 	if (EVMA::KeyPressed(SDL_SCANCODE_N))
@@ -151,14 +156,12 @@ void TitleState::Update()
 	}
 	State::Update();
 }
-
 void TitleState::Render()
 {
 	SDL_SetRenderDrawColor(REMA::GetRenderer(), 255, 0, 0, 255);
 	SDL_RenderClear(REMA::GetRenderer());
 	State::Render();
 }
-
 void TitleState::Exit()
 {
 	cout << "Exiting TitleState..." << endl;

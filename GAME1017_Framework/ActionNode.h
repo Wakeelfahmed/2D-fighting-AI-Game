@@ -5,7 +5,7 @@
 
 enum class ActionState
 {
-	IDLE_STATE, PATROL_STATE
+	IDLE_STATE, PATROL_STATE, ATTACK_STATE, MoveToRange
 };
 
 class ActionNode : public TreeNode // Abstract class.

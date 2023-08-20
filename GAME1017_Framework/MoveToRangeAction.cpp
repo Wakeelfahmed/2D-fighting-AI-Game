@@ -13,6 +13,6 @@ MoveToRangeAction::~MoveToRangeAction() = default;
 void MoveToRangeAction::Action()
 {
 	std::cout << "Performing " << m_name << std::endl;
-	// GetAgent()->MoveToRange();
+	 GetAgent()->MoveToRange();
 }
 

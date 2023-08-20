@@ -2,7 +2,7 @@
 #define __GAMEOBJECT_H__
 #include <SDL_rect.h>
 
-enum AnimState { STATE_IDLING, STATE_RUNNING, STATE_ATTACK };
+enum AnimState { STATE_IDLING, STATE_RUNNING, STATE_ATTACK, STATE_Move_To_Range };
 
 class GameObject
 {
