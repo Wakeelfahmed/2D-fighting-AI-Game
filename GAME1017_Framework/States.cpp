@@ -37,8 +37,6 @@ void State::Update()
 					if (key == "player") {
 						Player* player = dynamic_cast<Player*>(object);
 						if (player) {
-							// Player-specific logic
-							// For example:
 							player->Take_Damage();
 						}
 					}
@@ -53,9 +51,17 @@ void State::Update()
 				if (MAMA::Distance(GetChild("enemy2")->GetCenter(), GetChild("player")->GetCenter()) <= 30.0 &&
 					MAMA::Rad2Deg(MAMA::AngleBetweenPoints(GetChild("player")->GetCenter().y - GetChild("enemy2")->GetCenter().y, GetChild("player")->GetCenter().x - GetChild("enemy2")->GetCenter().x)) < 180)
 				{
-					i.second->GetCenter();
 					cout << "Close range\n";
 					i.second->Update(true);
+					const std::string& key = m_objects[1].first;
+					GameObject* object = m_objects[1].second;
+
+					if (key == "player") {
+						Player* player = dynamic_cast<Player*>(object);
+						if (player) {
+							player->Take_Damage();
+						}
+					}
 				}
 				else
 					i.second->Update(false);

@@ -84,55 +84,6 @@ void Enemy::Update(bool withinrange)
 	GetTree()->MakeDecision();
 	Animate();
 }
-void Enemy::Update()
-{
-	m_healthDst = { m_dst.x,m_dst.y - 10,32,7 };
-	m_curHealthDst = { m_dst.x + 1,m_dst.y - 9,static_cast<float>(m_health),5 };
-	if (EVMA::KeyPressed(SDL_SCANCODE_T))
-	{
-		m_isIdling = !m_isIdling;
-		GetTree()->GetIdleNode()->SetIsIdle(m_isIdling);
-	}
-
-	SDL_FRect* target = STMA::GetStates().front()->GetChild("player")->GetDst();
-	SDL_FPoint targetCenter = STMA::GetStates().front()->GetChild("player")->GetCenter();
-	std::vector<Tile*>& obsOrig = STMA::GetStates().front()->GetChild<TiledLevel*>("level")->GetObstacles();
-	std::vector<Tile*> obstacles;
-	// Add only obstacles that are between player and target.
-	double targetDist = MAMA::Distance(GetCenter(), targetCenter);
-	for (auto obstacle : obsOrig)
-	{
-		double obsDist = MAMA::Distance(GetCenter(), obstacle->GetCenter());
-		if (obsDist < targetDist)
-			obstacles.push_back(obstacle);
-	}
-	double angle = MAMA::AngleBetweenPoints(targetCenter.y - GetCenter().y,
-		targetCenter.x - GetCenter().x);
-	m_losRay = { static_cast<float>(GetCenter().x + MAMA::SetDeltaX(angle, 300.0)),
-	static_cast<float>(GetCenter().y + MAMA::SetDeltaY(angle, 300.0)) };
-	if (COMA::LOSCheck(GetCenter(), m_losRay, target, obstacles)) {
-		m_hasLOS = true;
-		GetTree()->GetLOSNode()->SetHasLOS(m_hasLOS);
-	}
-	else {
-		m_hasLOS = false;
-		GetTree()->GetLOSNode()->SetHasLOS(m_hasLOS);
-	}
-
-	if (MAMA::Distance(m_dst.x, target->x, m_dst.y, target->y) <= m_detectionRad) {
-		m_isDetected = true;
-		GetTree()->GetDetectNode()->SetHasDetected(m_isDetected);
-	}
-	else {
-		m_isDetected = false;
-		GetTree()->GetDetectNode()->SetHasDetected(m_isDetected);
-	}
-
-	
-	// Make decision.
-	GetTree()->MakeDecision();
-	Animate();
-}	//remove
 void Enemy::Render()
 {
 	SDL_RenderCopyExF(REMA::GetRenderer(), TEMA::GetTexture("enemy"), GetSrc(), GetDst(), 0, 0, static_cast<SDL_RendererFlip>(m_dir));
@@ -180,7 +131,31 @@ void Enemy::Attack() {
 }
 void Enemy::Flee()
 {
+	if (GetActionState() != ActionState::PATROL_STATE) // If current action is not idle
+	{
+		SetActionState(ActionState::PATROL_STATE);
+		SetAnimation(AnimState::STATE_RUNNING, 8, 1, 8, 0);
+	}
+	SDL_FPoint fleeDirection = { GetCenter().x - kWidth / 2, GetCenter().y - kHeight / 2 };
 
+	// Normalize the direction vector
+	float length = sqrt(fleeDirection.x * fleeDirection.x + fleeDirection.y * fleeDirection.y);
+	if (length != 0)
+	{
+		fleeDirection.x /= length;
+		fleeDirection.y /= length;
+	}
+
+	// Move the enemy away from the center of the screen
+	m_dst.x += fleeDirection.x * m_vel;
+	m_dst.y += fleeDirection.y * m_vel;
+
+	// Check if the enemy is beyond the screen bounds
+	if (m_dst.x < -m_dst.w || m_dst.x > kWidth || m_dst.y < -m_dst.h || m_dst.y > kHeight)
+	{
+		// Disable the enemy or perform other actions as needed
+		SetEnabled(false);
+	}
 }
 void Enemy::MoveToRange() {
 	if (GetActionState() != ActionState::PATROL_STATE) // If current action is not idle
@@ -401,8 +376,6 @@ void RangedCombatEnemy::BuildTree()
 
 	TreeNode* idleAction = m_tree->AddNode(idleCondition, new IdleAction(this), TreeNodeType::LEFT_TREE_NODE);
 	m_tree->GetNodes().push_back(idleAction);
-
-	m_tree->m_treeNodeList;
 
 	HurtCondition* hurtCondition = new HurtCondition();
 	m_tree->SetHurtNode(hurtCondition);

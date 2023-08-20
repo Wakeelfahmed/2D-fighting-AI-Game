@@ -43,8 +43,8 @@ public:
 	void Clean();
 	void MakeDecision(); // Traverse tree in order
 
-	std::vector<TreeNode*> m_treeNodeList;
 private:
+	std::vector<TreeNode*> m_treeNodeList;
 	Enemy* m_agent;
 	// Nodes.
 	DetectCondition* m_detectNode;

@@ -257,3 +257,5 @@ paket-files/
 # Python Tools for Visual Studio (PTVS)
 __pycache__/
 *.pyc
+/GAME1017_Framework/x64/Debug/GAME1017.eeb103f7.tlog/CL.write.1.tlog
+/GAME1017_Framework/x64/Debug/vc143.idb

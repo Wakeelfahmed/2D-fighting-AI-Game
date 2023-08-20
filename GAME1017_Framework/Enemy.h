@@ -14,7 +14,7 @@ protected:
 	DecisionTree* GetTree();
 public:
 	Enemy(SDL_Rect s, SDL_FRect d, TiledLevel* level, int startingpath);
-	void virtual Update();
+	void virtual Update(){}
 	void virtual Update(bool Within_Close_Range);
 	void Render();
 	void SetDebugView() { m_isDebuging = !m_isDebuging; }
@@ -58,7 +58,6 @@ protected:
 	int m_health;
 	TiledLevel* m_level;
 	ActionState m_action;
-private:
 };
 
 class CloseCombatEnemy : public Enemy
