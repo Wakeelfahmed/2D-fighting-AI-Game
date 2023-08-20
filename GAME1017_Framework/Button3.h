@@ -23,6 +23,8 @@ private:
 	void Execute();
 public:
 	PlayButton(SDL_Rect src, SDL_FRect dst, const char* key);
+	void Update(bool withinrange) {}
+
 };
 
 #endif

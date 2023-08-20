@@ -10,6 +10,7 @@ class Player : public AnimatedSprite
 public:
 	Player(SDL_Rect s, SDL_FRect d, TiledLevel* level);
 	void Update();
+	void Update(bool withinrange) {}
 	void Render();
 	bool GetDir() { return m_dir; }
 private:

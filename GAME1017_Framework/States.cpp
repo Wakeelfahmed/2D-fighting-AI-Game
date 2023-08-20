@@ -38,6 +38,20 @@ void State::Update()
 					i.second->Update(false);
 			}
 		}
+		else if (i.first == "enemy2") {
+			if (GetChild("enemy1") != nullptr)
+			{
+				if (MAMA::Distance(GetChild("enemy1")->GetCenter(), GetChild("player")->GetCenter()) <= 30.0 &&
+					MAMA::Rad2Deg(MAMA::AngleBetweenPoints(GetChild("player")->GetCenter().y - GetChild("enemy1")->GetCenter().y, GetChild("player")->GetCenter().x - GetChild("enemy1")->GetCenter().x)) < 180)
+				{
+					i.second->GetCenter();
+					cout << "Close range\n";
+					i.second->Update(true);
+				}
+				else
+					i.second->Update(false);
+			}
+		}
 		else
 			i.second->Update();
 		if (STMA::StateChanging()) return;

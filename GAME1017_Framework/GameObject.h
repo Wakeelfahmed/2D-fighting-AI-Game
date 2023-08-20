@@ -11,6 +11,7 @@ public:
 	SDL_FRect* GetDst();
 	SDL_FPoint GetCenter() const;
 	virtual void Update() = 0;
+	virtual void Update(bool withinrange) = 0;
 	virtual void Render() = 0;
 	const bool GetEnabled() const; 
 	void SetEnabled(const bool e);

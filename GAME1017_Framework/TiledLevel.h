@@ -19,6 +19,7 @@ public:
 	bool IsHazard() { return m_hazard; }
 	void SetXY(float x, float y) { m_dst.x = x; m_dst.y = y; }
 	void Update() {}
+	void Update(bool withinrange){}
 	void Render() {}
 public:
 	Label* m_lCost, * m_lX, * m_lY;
@@ -34,6 +35,7 @@ public:
 		const char* tileData, const char* levelData, const char* tileKey);
 	~TiledLevel();
 	void Update() {} // Empty.
+	void Update(bool withinrange){}
 	void Render();
 	std::vector<Tile*>& GetObstacles();
 	std::vector<std::vector<Tile*>>& GetLevel();

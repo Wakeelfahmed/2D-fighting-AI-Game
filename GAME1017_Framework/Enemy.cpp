@@ -362,22 +362,22 @@ void CloseCombatEnemy::BuildTree()
 	m_tree->AddNode(m_tree->GetDetectNode(), m_tree->GetRangeNode(), TreeNodeType::LEFT_TREE_NODE);
 	m_tree->GetNodes().push_back(withinRangeCondition);
 
-	// Add left action node (Move to Player)
-	TreeNode* moveToPlayerAction = m_tree->AddNode(withinRangeCondition, new MoveToPlayerAction(this), TreeNodeType::LEFT_TREE_NODE);
+	// Add right action node (Move to Player)
+	TreeNode* moveToPlayerAction = m_tree->AddNode(withinRangeCondition, new MoveToPlayerAction(this), TreeNodeType::RIGHT_TREE_NODE);
 	m_tree->GetNodes().push_back(moveToPlayerAction);
 
-	// Add right condition node (Has LOS?)
+	// Add left condition node (Has LOS?)
 	LOSCondition* hasLOSCondition = new LOSCondition();
 	m_tree->SetLOSNode(hasLOSCondition);
-	m_tree->AddNode(m_tree->GetRangeNode(), m_tree->GetLOSNode(), TreeNodeType::RIGHT_TREE_NODE);
+	m_tree->AddNode(m_tree->GetRangeNode(), m_tree->GetLOSNode(), TreeNodeType::LEFT_TREE_NODE);
 	m_tree->GetNodes().push_back(hasLOSCondition);
 
-	// Add left action node (Move to Player)
-	TreeNode* moveToPlayerAction2 = m_tree->AddNode(hasLOSCondition, new MoveToPlayerAction(this), TreeNodeType::LEFT_TREE_NODE);
+	// Add right action node (Move to Player)
+	TreeNode* moveToPlayerAction2 = m_tree->AddNode(hasLOSCondition, new MoveToPlayerAction(this), TreeNodeType::RIGHT_TREE_NODE);
 	m_tree->GetNodes().push_back(moveToPlayerAction2);
 
-	// Add right action node (Attack)
-	TreeNode* attackAction = m_tree->AddNode(hasLOSCondition, new AttackAction(this), TreeNodeType::RIGHT_TREE_NODE);
+	// Add left action node (Attack)
+	TreeNode* attackAction = m_tree->AddNode(hasLOSCondition, new AttackAction(this), TreeNodeType::LEFT_TREE_NODE);
 	m_tree->GetNodes().push_back(attackAction);
 
 
