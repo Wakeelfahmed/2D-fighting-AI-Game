@@ -3,7 +3,7 @@
 HealthCondition::HealthCondition(const bool okHealth)
 {
 	SetOkHealth(okHealth);
-	m_name = "Hurt Condition";
+	m_name = "Health Condition";
 }
 
 HealthCondition::~HealthCondition() = default;

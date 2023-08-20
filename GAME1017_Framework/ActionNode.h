@@ -15,16 +15,16 @@ public:
 	virtual ~ActionNode() = default;
 	virtual void Action() = 0;
 };
-class CloseCombatAction : public ActionNode
-{
-public:
-	CloseCombatAction(Enemy* agent);
-	virtual ~CloseCombatAction();
-
-	virtual void Action() override;
-private:
-
-};
+//class CloseCombatAction : public ActionNode
+//{
+//public:
+//	CloseCombatAction(Enemy* agent);
+//	virtual ~CloseCombatAction();
+//
+//	virtual void Action() override;
+//private:
+//
+//};
 //class RangedAttackAction : public ActionNode
 //{
 //public:

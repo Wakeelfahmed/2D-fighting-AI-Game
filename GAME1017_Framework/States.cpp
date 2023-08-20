@@ -17,7 +17,6 @@
 #include "FontManager.h"
 #include "PathManager.h"
 #include <iostream>
-
 using namespace std;
 
 void State::Update()
@@ -67,7 +66,6 @@ void State::Update()
 		if (STMA::StateChanging()) return;
 	}
 }
-
 void State::Render()
 {
 	for (auto const& i : m_objects)
@@ -222,7 +220,7 @@ void GameState::Enter()
 	AddChild("player", new Player({ 0,256,128,128 }, { (float)(16) * 32, (float)(12) * 32.0f, 32.0f, 32.0f }, GetChild<TiledLevel*>("level")));
 	AddChild("menu", new Label("ltype14", 35.0f, 7.0f, "MENU: (~) Toggle Debug | WADS: Move Player | V: To Attack Enemy | T: For Enemy Movement | Space: Toggle Heuristic", { 255,255,255,255 }));
 	AddChild("enemy1", new CloseCombatEnemy({ 0,0,128,128 }, { (float)(4) * 32, (float)(1) * 32.0f, 32.0f, 32.0f }, GetChild<TiledLevel*>("level"), 1));	//far one
-	AddChild("enemy2", new CloseCombatEnemy({ 0,0,128,128 }, { (float)(27) * 32, (float)(3) * 32.0f, 32.0f, 32.0f }, GetChild<TiledLevel*>("level"), 2));
+	AddChild("enemy2", new RangedCombatEnemy({ 0,0,128,128 }, { (float)(27) * 32, (float)(3) * 32.0f, 32.0f, 32.0f }, GetChild<TiledLevel*>("level"), 2));
 
 	m_enemyCounter = 2;
 

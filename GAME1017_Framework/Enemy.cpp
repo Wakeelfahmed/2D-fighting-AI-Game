@@ -17,6 +17,7 @@
 //#include "MoveToPlayerAction.h"
 #include "MoveToRangeAction.h"
 #include "AttackAction.h"
+#include "FleeAction.h"
 #define SPEED 2.0
 #include<iostream>
 Enemy::Enemy(SDL_Rect s, SDL_FRect d, TiledLevel* level, int startingpath)
@@ -79,11 +80,6 @@ void Enemy::Update(bool withinrange)
 		GetTree()->GetDetectNode()->SetHasDetected(m_isDetected);
 	}
 
-	/*if (m_isDetected && m_isDebuging && m_state != STATE_ATTACK) {
-		SetAnimation(STATE_ATTACK, 4, 1, 4, 128);
-		std::cout << "ATTACK AN SET\n";
-	}
-	if (m_state == STATE_ATTACK && !m_isDetected)*/
 	// Make decision.
 	GetTree()->MakeDecision();
 	Animate();
@@ -132,11 +128,7 @@ void Enemy::Update()
 		GetTree()->GetDetectNode()->SetHasDetected(m_isDetected);
 	}
 
-	/*if (m_isDetected && m_isDebuging && m_state != STATE_ATTACK) {
-		SetAnimation(STATE_ATTACK, 4, 1, 4, 128);
-		std::cout << "ATTACK AN SET\n";
-	}
-	if (m_state == STATE_ATTACK && !m_isDetected)*/
+	
 	// Make decision.
 	GetTree()->MakeDecision();
 	Animate();
@@ -186,8 +178,11 @@ void Enemy::Attack() {
 		SetAnimation(AnimState::STATE_ATTACK, 4, 1, 4, 128);
 	}
 }
+void Enemy::Flee()
+{
+
+}
 void Enemy::MoveToRange() {
-	//std::cout << "Move to range\n";
 	if (GetActionState() != ActionState::PATROL_STATE) // If current action is not idle
 	{
 		SetActionState(ActionState::PATROL_STATE);
@@ -271,82 +266,24 @@ bool Enemy::CheckCollision(const double dX, const double dY)
 	}
 	return false;
 }
-void Enemy::TakeDamage()
-{
-	m_health -= 10;
-}
+void Enemy::TakeDamage() { m_health -= 5; }
 DecisionTree* Enemy::GetTree()
 {
 	return m_tree;
 }
-ActionState Enemy::GetActionState()
-{
-	return m_action;
-}
+ActionState Enemy::GetActionState() { return m_action; }
 void Enemy::SetActionState(ActionState action)
 {
 	m_action = action;
 }
-//void Enemy::BuildTree();
 
 CloseCombatEnemy::CloseCombatEnemy(SDL_Rect s, SDL_FRect d, TiledLevel* level, int startingpath)
 	: Enemy(s, d, level, startingpath)
 {
 	m_tree = new DecisionTree(this);
 	BuildTree();
-	//Set initial idling state in tree.
-	//GetTree()->GetIdleNode()->SetIsIdle(true);
 	SetAnimation(AnimState::STATE_IDLING, 1, 0, 1, 0);
-	//BuildTree(); // Call the specific BuildTree function for CCE
 }
-
-//void CloseCombatEnemy::Update()
-//{
-//	m_healthDst = { m_dst.x,m_dst.y - 10,32,7 };
-//	m_curHealthDst = { m_dst.x + 1,m_dst.y - 9,static_cast<float>(m_health),5 };
-//	if (EVMA::KeyPressed(SDL_SCANCODE_T))
-//	{
-//		m_isIdling = !m_isIdling;
-//		GetTree()->GetIdleNode()->SetIsIdle(m_isIdling);
-//	}
-//	//m_isIdling = false;
-//	SDL_FRect* target = STMA::GetStates().front()->GetChild("player")->GetDst();
-//	SDL_FPoint targetCenter = STMA::GetStates().front()->GetChild("player")->GetCenter();
-//	std::vector<Tile*>& obsOrig = STMA::GetStates().front()->GetChild<TiledLevel*>("level")->GetObstacles();
-//	std::vector<Tile*> obstacles;
-//	// Add only obstacles that are between player and target.
-//	double targetDist = MAMA::Distance(GetCenter(), targetCenter);
-//	for (auto obstacle : obsOrig)
-//	{
-//		double obsDist = MAMA::Distance(GetCenter(), obstacle->GetCenter());
-//		if (obsDist < targetDist)
-//			obstacles.push_back(obstacle);
-//	}
-//	double angle = MAMA::AngleBetweenPoints(targetCenter.y - GetCenter().y,
-//		targetCenter.x - GetCenter().x);
-//	m_losRay = { static_cast<float>(GetCenter().x + MAMA::SetDeltaX(angle, 300.0)),
-//	static_cast<float>(GetCenter().y + MAMA::SetDeltaY(angle, 300.0)) };
-//	if (COMA::LOSCheck(GetCenter(), m_losRay, target, obstacles))
-//		m_hasLOS = true;
-//	else
-//		m_hasLOS = false;
-//
-//	if (MAMA::Distance(m_dst.x, target->x, m_dst.y, target->y) <= m_detectionRad) {
-//		m_isDetected = true;
-//		//getA SetHasDetected();
-//	}
-//	else
-//		m_isDetected = false;
-//	/*if (m_isDetected && m_isDebuging && m_state != STATE_ATTACK) {
-//		SetAnimation(STATE_ATTACK, 4, 1, 4, 128);
-//		std::cout << "ATTACK AN SET\n";
-//	}
-//	if (m_state == STATE_ATTACK && !m_isDetected)*/
-//	// Make decision.
-//	GetTree()->MakeDecision();
-//	Animate();
-//}
-
 void CloseCombatEnemy::BuildTree()
 {
 	IdleCondition* idleCondition = new IdleCondition();
@@ -390,7 +327,6 @@ void CloseCombatEnemy::BuildTree()
 	// Add left action node (Attack)
 	TreeNode* attackAction = m_tree->AddNode(hasLOSCondition, new AttackAction(this), TreeNodeType::LEFT_TREE_NODE);
 	m_tree->GetNodes().push_back(attackAction);
-
 }
 
 RangedCombatEnemy::RangedCombatEnemy(SDL_Rect s, SDL_FRect d, TiledLevel* level, int startingpath)
@@ -398,64 +334,131 @@ RangedCombatEnemy::RangedCombatEnemy(SDL_Rect s, SDL_FRect d, TiledLevel* level,
 {
 	m_tree = new DecisionTree(this);
 	BuildTree();
-	//Set initial idling state in tree.
-	//GetTree()->GetIdleNode()->SetIsIdle(true);
 	SetAnimation(AnimState::STATE_IDLING, 1, 0, 1, 0);
+}
+void RangedCombatEnemy::Update(bool withinrange) {
+	m_healthDst = { m_dst.x,m_dst.y - 10,32,7 };
+	m_curHealthDst = { m_dst.x + 1,m_dst.y - 9,static_cast<float>(m_health),5 };
+	if (EVMA::KeyPressed(SDL_SCANCODE_T))
+	{
+		m_isIdling = !m_isIdling;
+		GetTree()->GetIdleNode()->SetIsIdle(m_isIdling);
+	}
+
+	SDL_FRect* target = STMA::GetStates().front()->GetChild("player")->GetDst();
+	SDL_FPoint targetCenter = STMA::GetStates().front()->GetChild("player")->GetCenter();
+	std::vector<Tile*>& obsOrig = STMA::GetStates().front()->GetChild<TiledLevel*>("level")->GetObstacles();
+	std::vector<Tile*> obstacles;
+	// Add only obstacles that are between player and target.
+	double targetDist = MAMA::Distance(GetCenter(), targetCenter);
+	for (auto obstacle : obsOrig)
+	{
+		double obsDist = MAMA::Distance(GetCenter(), obstacle->GetCenter());
+		if (obsDist < targetDist)
+			obstacles.push_back(obstacle);
+	}
+	double angle = MAMA::AngleBetweenPoints(targetCenter.y - GetCenter().y,
+		targetCenter.x - GetCenter().x);
+	m_losRay = { static_cast<float>(GetCenter().x + MAMA::SetDeltaX(angle, 300.0)),
+	static_cast<float>(GetCenter().y + MAMA::SetDeltaY(angle, 300.0)) };
+	if (COMA::LOSCheck(GetCenter(), m_losRay, target, obstacles)) {
+		m_hasLOS = true;
+		GetTree()->GetLOSNode()->SetHasLOS(m_hasLOS);
+	}
+	else {
+		m_hasLOS = false;
+		GetTree()->GetLOSNode()->SetHasLOS(m_hasLOS);
+	}
+
+	GetTree()->GetRangeNode()->SetWithinRange(withinrange);
+	if (m_health > 7)
+		GetTree()->GetHealthNode()->SetOkHealth(1);
+	else
+		GetTree()->GetHealthNode()->SetOkHealth(0);
+	if (m_health < 30)
+		GetTree()->GetHurtNode()->SetIsHurt(1);
+	else
+		GetTree()->GetHurtNode()->SetIsHurt(0);
+
+	if (MAMA::Distance(m_dst.x, target->x, m_dst.y, target->y) <= m_detectionRad) {
+		m_isDetected = true;
+		GetTree()->GetDetectNode()->SetHasDetected(m_isDetected);
+	}
+	else {
+		m_isDetected = false;
+		GetTree()->GetDetectNode()->SetHasDetected(m_isDetected);
+	}
+
+	// Make decision.
+	GetTree()->MakeDecision();
+	Animate();
 }
 void RangedCombatEnemy::BuildTree()
 {
+	IdleCondition* idleCondition = new IdleCondition();
+	m_tree->SetIdleNode(idleCondition);
+	m_tree->GetNodes().push_back(idleCondition);
+
+	TreeNode* idleAction = m_tree->AddNode(idleCondition, new IdleAction(this), TreeNodeType::LEFT_TREE_NODE);
+	m_tree->GetNodes().push_back(idleAction);
+
+	m_tree->m_treeNodeList;
+
+	HurtCondition* hurtCondition = new HurtCondition();
+	m_tree->SetHurtNode(hurtCondition);
+	m_tree->AddNode(m_tree->GetIdleNode(), m_tree->GetHurtNode(), TreeNodeType::RIGHT_TREE_NODE);
+	m_tree->GetNodes().push_back(hurtCondition);
+
+	HealthCondition* healthCondition = new HealthCondition();
+	m_tree->SetHealthNode(healthCondition);
+	m_tree->AddNode(m_tree->GetHurtNode(), m_tree->GetHealthNode(), TreeNodeType::LEFT_TREE_NODE);
+	m_tree->GetNodes().push_back(healthCondition);
+
+	// Add right condition node (Player Detected?)
+	DetectCondition* playerDetectedCondition = new DetectCondition();
+	m_tree->SetDetectNode(playerDetectedCondition);
+	m_tree->AddNode(m_tree->GetHurtNode(), m_tree->GetDetectNode(), TreeNodeType::RIGHT_TREE_NODE);
+	m_tree->GetNodes().push_back(playerDetectedCondition);
+
+	//reusing health for detect left
+	m_tree->AddNode(playerDetectedCondition, healthCondition, TreeNodeType::LEFT_TREE_NODE);
+
+	// Add left action node (Patrol)
+	TreeNode* patrolAction = m_tree->AddNode(playerDetectedCondition, new PatrolAction(this), TreeNodeType::RIGHT_TREE_NODE);
+	m_tree->GetNodes().push_back(patrolAction);
+
+
+	// Add left condition node (Health over 25%)
+	/*HealthCondition* healthOverThresholdCondition = new HealthCondition(25);
+	m_tree->AddNode(m_tree->GetDetectNode(), healthOverThresholdCondition, TreeNodeType::LEFT_TREE_NODE);
+	m_tree->GetNodes().push_back(healthOverThresholdCondition);*/
+
+	// Add left action node (Flee)
+	TreeNode* fleeAction = m_tree->AddNode(healthCondition, new FleeAction(this), TreeNodeType::RIGHT_TREE_NODE);
+	m_tree->GetNodes().push_back(fleeAction);
+
+	//Add left condition node (Has LOS?)
+	LOSCondition* hasLOSCondition = new LOSCondition();
+	m_tree->SetLOSNode(hasLOSCondition);
+	m_tree->AddNode(healthCondition, m_tree->GetLOSNode(), TreeNodeType::LEFT_TREE_NODE);
+	m_tree->GetNodes().push_back(hasLOSCondition);
+
+	// Add left condition node (Within Range?)
+	RangeCondition* withinRangeCondition = new RangeCondition();
+	m_tree->SetRangeNode(withinRangeCondition);
+	m_tree->AddNode(m_tree->GetLOSNode(), m_tree->GetRangeNode(), TreeNodeType::LEFT_TREE_NODE);
+	m_tree->GetNodes().push_back(withinRangeCondition);
+
+	// Add left action node (Attack)
+	TreeNode* attackAction = m_tree->AddNode(withinRangeCondition, new AttackAction(this), TreeNodeType::LEFT_TREE_NODE);
+	m_tree->GetNodes().push_back(attackAction);
+
+	// Add right action node (Move to range)
+	TreeNode* moveToRangeAction = m_tree->AddNode(withinRangeCondition, new MoveToRangeAction(this), TreeNodeType::RIGHT_TREE_NODE);
+	m_tree->GetNodes().push_back(moveToRangeAction);
+
+	// Add right action node (Move to range)
+	TreeNode* moveToRangeAction2 = m_tree->AddNode(hasLOSCondition, new MoveToRangeAction(this), TreeNodeType::RIGHT_TREE_NODE);
+	m_tree->GetNodes().push_back(moveToRangeAction2);
 }
-//class RangedCombatEnemy : public Enemy
-//{
-//public:
-//	RangedCombatEnemy(SDL_Rect s, SDL_FRect d, TiledLevel* level, int startingpath);
-//	void Update() override;
-//
-//private:
-//	void BuildTree() override;
-//};
-//
-//RangedCombatEnemy::RangedCombatEnemy(SDL_Rect s, SDL_FRect d, TiledLevel* level, int startingpath)
-//	: Enemy(s, d, level, startingpath)
-//{
-//	BuildTree(); // Call the specific BuildTree function for RCE
-//}
-
-//void RangedCombatEnemy::Update()
-//{
-//	GetTree()->MakeDecision(); // Implement MakeDecision() in Enemy class to traverse the decision tree
-//	Animate(); // Implement the Animate() function
-//}
-//void CloseCombatEnemy::BuildTree()
-//{
-//	// Create and add root node
-//	IdleCondition* idleCondition = new IdleCondition();
-//	m_tree->SetIdleNode(idleCondition);
-//	m_tree->GetNodes().push_back(idleCondition);
-//
-//	// Add left action (IdleAction)
-//	TreeNode* idleAction = m_tree->AddNode(idleCondition, new IdleAction(this), TreeNodeType::LEFT_TREE_NODE);
-//	m_tree->GetNodes().push_back(idleAction);
-//
-//	// Add right action (CloseCombatAction)
-//	TreeNode* closeCombatAction = m_tree->AddNode(idleCondition, new CloseCombatAction(this), TreeNodeType::RIGHT_TREE_NODE);
-//	m_tree->GetNodes().push_back(closeCombatAction);
-//}
-
-// Inside RangedCombatEnemy class
-//void RangedCombatEnemy::BuildTree()
-//{
-//	// Create and add root node
-//	IdleCondition* idleCondition = new IdleCondition();
-//	m_tree->SetIdleNode(idleCondition);
-//	m_tree->GetNodes().push_back(idleCondition);
-//
-//	// Add left action.
-//	TreeNode* idleAction = m_tree->AddNode(idleCondition, new IdleAction(this), TreeNodeType::LEFT_TREE_NODE);
-//	m_tree->GetNodes().push_back(idleAction);
-//
-//	// Add right action.
-//	TreeNode* patrolAction = m_tree->AddNode(idleCondition, new PatrolAction(this), TreeNodeType::RIGHT_TREE_NODE);
-//	m_tree->GetNodes().push_back(patrolAction);
-//}
 

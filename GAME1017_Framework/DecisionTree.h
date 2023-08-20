@@ -43,9 +43,9 @@ public:
 	void Clean();
 	void MakeDecision(); // Traverse tree in order
 
+	std::vector<TreeNode*> m_treeNodeList;
 private:
 	Enemy* m_agent;
-	std::vector<TreeNode*> m_treeNodeList;
 	// Nodes.
 	DetectCondition* m_detectNode;
 	HealthCondition* m_healthNode;

@@ -13,20 +13,20 @@ FleeAction::~FleeAction() = default;
 void FleeAction::Action()
 {
 	std::cout << "Performing " << m_name << std::endl;
-	//GetAgent()->Flee();
+	GetAgent()->Flee();
 }
 
-CloseCombatAction::CloseCombatAction(Enemy* agent)
-{
-	m_name = "Close Combat Action";
-	SetAgent(agent);
-}
+//CloseCombatAction::CloseCombatAction(Enemy* agent)
+//{
+//	m_name = "Close Combat Action";
+//	SetAgent(agent);
+//}
+//
+//CloseCombatAction::~CloseCombatAction() = default;
 
-CloseCombatAction::~CloseCombatAction() = default;
-
-void CloseCombatAction::Action()
-{
-	std::cout << "Performing " << m_name << std::endl;
-	//GetAgent()->Flee();
-}
+//void CloseCombatAction::Action()
+//{
+//	std::cout << "Performing " << m_name << std::endl;
+//	//GetAgent()->Flee();
+//}
 

@@ -15,7 +15,7 @@ protected:
 public:
 	Enemy(SDL_Rect s, SDL_FRect d, TiledLevel* level, int startingpath);
 	void virtual Update();
-	void Update(bool Within_Close_Range);
+	void virtual Update(bool Within_Close_Range);
 	void Render();
 	void SetDebugView() { m_isDebuging = !m_isDebuging; }
 	// Action methods. Fill in for lab.
@@ -23,6 +23,7 @@ public:
 	void Patrol();
 	void MoveToRange();
 	void Attack();
+	void Flee();
 	bool CheckCollision(const double dX, const double dY);
 	bool GetDir() { return m_dir; }
 	int GetHealth() { return m_health; }
@@ -71,6 +72,7 @@ private:
 class RangedCombatEnemy : public Enemy
 {
 public:
+	void Update(bool Within_Close_Range);
 	RangedCombatEnemy(SDL_Rect s, SDL_FRect d, TiledLevel* level, int startingpath);
 
 private:
@@ -78,48 +80,3 @@ private:
 };
 
 #endif
-//RangedCombatEnemy::RangedCombatEnemy(SDL_Rect s, SDL_FRect d, TiledLevel* level, int startingpath)
-//	: Enemy(s, d, level, startingpath)
-//{
-//	BuildTree(); // Call the specific BuildTree function for RCE
-//}
-//
-//void RangedCombatEnemy::Update()
-//{
-//	GetTree()->MakeDecision(); // Implement MakeDecision() in Enemy class to traverse the decision tree
-//	Animate(); // Implement the Animate() function
-//}
-//void CloseCombatEnemy::BuildTree()
-//{
-//	// Create and add root node
-//	IdleCondition* idleCondition = new IdleCondition();
-//	m_tree->SetIdleNode(idleCondition);
-//	m_tree->GetNodes().push_back(idleCondition);
-//
-//	// Add left action (IdleAction)
-//	TreeNode* idleAction = m_tree->AddNode(idleCondition, new IdleAction(this), TreeNodeType::LEFT_TREE_NODE);
-//	m_tree->GetNodes().push_back(idleAction);
-//
-//	// Add right action (CloseCombatAction)
-//	TreeNode* closeCombatAction = m_tree->AddNode(idleCondition, new CloseCombatAction(this), TreeNodeType::RIGHT_TREE_NODE);
-//	m_tree->GetNodes().push_back(closeCombatAction);
-//}
-
-// Inside RangedCombatEnemy class
-//void RangedCombatEnemy::BuildTree()
-//{
-//	// Create and add root node
-//	IdleCondition* idleCondition = new IdleCondition();
-//	m_tree->SetIdleNode(idleCondition);
-//	m_tree->GetNodes().push_back(idleCondition);
-//
-//	// Add left action (IdleAction)
-//	TreeNode* idleAction = m_tree->AddNode(idleCondition, new IdleAction(this), TreeNodeType::LEFT_TREE_NODE);
-//	m_tree->GetNodes().push_back(idleAction);
-//
-//	// Add right action (RangedAttackAction)
-//	TreeNode* rangedAttackAction = m_tree->AddNode(idleCondition, new RangedAttackAction(this), TreeNodeType::RIGHT_TREE_NODE);
-//	m_tree->GetNodes().push_back(rangedAttackAction);
-//}
-
-
