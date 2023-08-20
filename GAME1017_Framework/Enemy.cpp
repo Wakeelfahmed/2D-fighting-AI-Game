@@ -113,6 +113,9 @@ void Enemy::Render()
 	else
 		SDL_SetRenderDrawColor(REMA::GetRenderer(), 0, 0, 255, 255);
 	SDL_RenderFillRectF(REMA::GetRenderer(), &m_curHealthDst);
+	for (int i = 0; i < mProjectiles.size(); i++) {
+		mProjectiles[i]->render();
+	}
 }
 void Enemy::Idle()
 {
@@ -153,8 +156,7 @@ void Enemy::Flee()
 	// Check if the enemy is beyond the screen bounds
 	if (m_dst.x < -m_dst.w || m_dst.x > kWidth || m_dst.y < -m_dst.h || m_dst.y > kHeight)
 	{
-		// Disable the enemy or perform other actions as needed
-		SetEnabled(false);
+		SetEnabled(false);	// Disable the enemy
 	}
 }
 void Enemy::MoveToRange() {
@@ -311,6 +313,97 @@ RangedCombatEnemy::RangedCombatEnemy(SDL_Rect s, SDL_FRect d, TiledLevel* level,
 	BuildTree();
 	SetAnimation(AnimState::STATE_IDLING, 1, 0, 1, 0);
 }
+void RangedCombatEnemy::Update(bool Within_Close_Range, SDL_FRect& object1)
+{
+	m_healthDst = { m_dst.x,m_dst.y - 10,32,7 };
+	m_curHealthDst = { m_dst.x + 1,m_dst.y - 9,static_cast<float>(m_health),5 };
+	if (EVMA::KeyPressed(SDL_SCANCODE_T))
+	{
+		m_isIdling = !m_isIdling;
+		GetTree()->GetIdleNode()->SetIsIdle(m_isIdling);
+	}
+
+	SDL_FRect* target = STMA::GetStates().front()->GetChild("player")->GetDst();
+	SDL_FPoint targetCenter = STMA::GetStates().front()->GetChild("player")->GetCenter();
+	std::vector<Tile*>& obsOrig = STMA::GetStates().front()->GetChild<TiledLevel*>("level")->GetObstacles();
+	std::vector<Tile*> obstacles;
+	// Add only obstacles that are between player and target.
+	double targetDist = MAMA::Distance(GetCenter(), targetCenter);
+	for (auto obstacle : obsOrig)
+	{
+		double obsDist = MAMA::Distance(GetCenter(), obstacle->GetCenter());
+		if (obsDist < targetDist)
+			obstacles.push_back(obstacle);
+	}
+	double angle = MAMA::AngleBetweenPoints(targetCenter.y - GetCenter().y,
+		targetCenter.x - GetCenter().x);
+	m_losRay = { static_cast<float>(GetCenter().x + MAMA::SetDeltaX(angle, 300.0)),
+	static_cast<float>(GetCenter().y + MAMA::SetDeltaY(angle, 300.0)) };
+	if (COMA::LOSCheck(GetCenter(), m_losRay, target, obstacles)) {
+		m_hasLOS = true;
+		GetTree()->GetLOSNode()->SetHasLOS(m_hasLOS);
+	}
+	else {
+		m_hasLOS = false;
+		GetTree()->GetLOSNode()->SetHasLOS(m_hasLOS);
+	}
+
+	GetTree()->GetRangeNode()->SetWithinRange(Within_Close_Range);
+	if (m_health > 7)
+		GetTree()->GetHealthNode()->SetOkHealth(1);
+	else
+		GetTree()->GetHealthNode()->SetOkHealth(0);
+	if (m_health < 30)
+		GetTree()->GetHurtNode()->SetIsHurt(1);
+	else
+		GetTree()->GetHurtNode()->SetIsHurt(0);
+
+	if (MAMA::Distance(m_dst.x, target->x, m_dst.y, target->y) <= m_detectionRad) {
+		m_isDetected = true;
+		GetTree()->GetDetectNode()->SetHasDetected(m_isDetected);
+	}
+	else {
+		m_isDetected = false;
+		GetTree()->GetDetectNode()->SetHasDetected(m_isDetected);
+	}
+	/*for (int i = 0; i < mProjectiles.size(); i++) {
+		mProjectiles[i]->update(m_frame);
+	}*/
+	for (int i = 0; i < mProjectiles.size(); i++) {
+		if (mProjectiles[i]->shouldBeDestroyed()) {
+			Projectile* pr = mProjectiles[i];
+			mProjectiles.erase(mProjectiles.begin() + i);
+			delete pr;
+			i--;
+		}
+		else {
+			mProjectiles[i]->update(m_frame);
+		}
+	}
+	// Make decision.
+	GetTree()->MakeDecision();
+	Animate();
+}
+void RangedCombatEnemy::Attack()
+{
+	if (GetActionState() != ActionState::ATTACK_STATE) // If current action is not attack
+	{
+		SetActionState(ActionState::ATTACK_STATE);
+		SetAnimation(AnimState::STATE_ATTACK, 4, 1, 4, 128);
+	}
+	if (mCurrentFrame < 50) {
+		mCurrentFrame++;  // Increment the frame count
+		return;  // Wait until the attack delay frames have passed
+	}
+
+	mCurrentFrame = 0;  // Reset the frame count
+
+	Projectile* newProjectile;
+	newProjectile = new Projectile(REMA::GetRenderer(), m_projectileImagePath, m_dst.x + 128 / 2 - 70, m_dst.y + 5, 20, 20, 0, 200, true);
+	newProjectile->setTargetPosition(500, 500);
+	mProjectiles.push_back(newProjectile);
+}
+
 void RangedCombatEnemy::Update(bool withinrange) {
 	m_healthDst = { m_dst.x,m_dst.y - 10,32,7 };
 	m_curHealthDst = { m_dst.x + 1,m_dst.y - 9,static_cast<float>(m_health),5 };
@@ -363,7 +456,20 @@ void RangedCombatEnemy::Update(bool withinrange) {
 		m_isDetected = false;
 		GetTree()->GetDetectNode()->SetHasDetected(m_isDetected);
 	}
-
+	/*for (int i = 0; i < mProjectiles.size(); i++) {
+		mProjectiles[i]->update(m_frame);
+	}*/
+	for (int i = 0; i < mProjectiles.size(); i++) {
+		if (mProjectiles[i]->shouldBeDestroyed()) {
+			Projectile* pr = mProjectiles[i];
+			mProjectiles.erase(mProjectiles.begin() + i);
+			delete pr;
+			i--;
+		}
+		else {
+			mProjectiles[i]->update(m_frame);
+		}
+	}
 	// Make decision.
 	GetTree()->MakeDecision();
 	Animate();
@@ -435,3 +541,52 @@ void RangedCombatEnemy::BuildTree()
 	m_tree->GetNodes().push_back(moveToRangeAction2);
 }
 
+//void Enemy::shoot() {
+//	Projectile* newProjectile;
+//	if (m_enemyType == ENEMY_TYPE_BOSS) {
+//		// Launch 3 projectiles at the same time
+//		newProjectile = new Projectile(m_renderer, m_projectileImagePath, mPosX + mWidth / 2 - 70, mPosY + 5, 40, 40, 0, 200, true);
+//		mProjectiles.push_back(newProjectile);
+//
+//		newProjectile = new Projectile(m_renderer, m_projectileImagePath, mPosX + mWidth / 2 - 35, mPosY + 10, 40, 40, 0, 200, true);
+//		mProjectiles.push_back(newProjectile);
+//
+//		newProjectile = new Projectile(m_renderer, m_projectileImagePath, mPosX + mWidth / 2, mPosY + 10, 40, 40, 0, 200, true);
+//		mProjectiles.push_back(newProjectile);
+//
+//		newProjectile = new Projectile(m_renderer, m_projectileImagePath, mPosX + mWidth / 2 + 35, mPosY + 5, 40, 40, 0, 200, true);
+//		mProjectiles.push_back(newProjectile);
+//
+//		m_audioManager->PlayBossLaserAudio();
+//	}
+//	else {
+//		newProjectile = new Projectile(m_renderer, m_projectileImagePath, mPosX + mWidth / 2 - 6, mPosY + 5, 14, 14, 0, 300, true);
+//		mProjectiles.push_back(newProjectile);
+//
+//		m_audioManager->PlayLaserSound();
+//	}
+//}
+std::vector<Projectile*>* Enemy::getProjectiles() {
+	return &mProjectiles;
+}
+//bool Enemy::isCollidingWithPlayerProjectiles() {
+//	SDL_Rect enemyRect = { mPosX, mPosY, mWidth, mHeight };
+//
+//	std::vector<Projectile*>* projectiles = m_player->getProjectiles();
+//
+//	for (int i = 0; i < projectiles->size(); i++) {
+//		if (projectiles->at(i) != nullptr && projectiles->at(i)->checkCollision(enemyRect)) {
+//			m_player->destroyProjectileAtIndex(i);
+//			i--;
+//			return true;
+//		}
+//	}
+//
+//	return false;
+//}
+
+void Enemy::destroyProjectileAtIndex(int index) {
+	Projectile* pr = mProjectiles[index];
+	mProjectiles.erase(mProjectiles.begin() + index);
+	delete pr;
+}

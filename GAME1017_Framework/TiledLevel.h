@@ -20,6 +20,7 @@ public:
 	void SetXY(float x, float y) { m_dst.x = x; m_dst.y = y; }
 	void Update() {}
 	void Update(bool withinrange){}
+	void Update(bool Within_Close_Range, SDL_FRect& object1){}
 	void Render() {}
 public:
 	Label* m_lCost, * m_lX, * m_lY;
@@ -36,6 +37,7 @@ public:
 	~TiledLevel();
 	void Update() {} // Empty.
 	void Update(bool withinrange){}
+	void Update(bool Within_Close_Range, SDL_FRect& object1) {}
 	void Render();
 	std::vector<Tile*>& GetObstacles();
 	std::vector<std::vector<Tile*>>& GetLevel();

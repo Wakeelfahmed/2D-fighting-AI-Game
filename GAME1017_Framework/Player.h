@@ -11,6 +11,7 @@ public:
 	Player(SDL_Rect s, SDL_FRect d, TiledLevel* level);
 	void Update();
 	void Update(bool withinrange) {}
+	void Update(SDL_FRect& object1) {}
 	void Render();
 	bool GetDir() { return m_dir; }
 	void Take_Damage() {

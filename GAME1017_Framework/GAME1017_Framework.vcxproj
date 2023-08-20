@@ -168,6 +168,7 @@
     <ClCompile Include="PatrolAction.cpp" />
     <ClCompile Include="Player.cpp" />
     <ClCompile Include="Primitives.cpp" />
+    <ClCompile Include="Projectile.cpp" />
     <ClCompile Include="RangeCondition.cpp" />
     <ClCompile Include="RenderManager.cpp" />
     <ClCompile Include="SoundManager.cpp" />
@@ -204,6 +205,7 @@
     <ClInclude Include="PatrolAction.h" />
     <ClInclude Include="Player.h" />
     <ClInclude Include="Primitives.h" />
+    <ClInclude Include="Projectile.h" />
     <ClInclude Include="RangeCondition.h" />
     <ClInclude Include="RenderManager.h" />
     <ClInclude Include="SoundManager.h" />

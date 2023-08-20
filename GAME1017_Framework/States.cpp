@@ -23,8 +23,10 @@ void State::Update()
 {
 	for (auto const& i : m_objects)
 	{
+		if (i.first == "player")
+			cout << i.second->GetDst()->x << endl;
 		if (i.first == "enemy1") {
-			if (GetChild("enemy1") != nullptr)
+			if (GetChild("enemy1") != nullptr)	//CombatEnemy
 			{
 				if (MAMA::Distance(GetChild("enemy1")->GetCenter(), GetChild("player")->GetCenter()) <= 30.0 &&
 					MAMA::Rad2Deg(MAMA::AngleBetweenPoints(GetChild("player")->GetCenter().y - GetChild("enemy1")->GetCenter().y, GetChild("player")->GetCenter().x - GetChild("enemy1")->GetCenter().x)) < 180)
@@ -46,20 +48,21 @@ void State::Update()
 			}
 		}
 		else if (i.first == "enemy2") {
-			if (GetChild("enemy2") != nullptr)
+			if (GetChild("enemy2") != nullptr)	//RangedCombatEnemy
 			{
 				if (MAMA::Distance(GetChild("enemy2")->GetCenter(), GetChild("player")->GetCenter()) <= 30.0 &&
 					MAMA::Rad2Deg(MAMA::AngleBetweenPoints(GetChild("player")->GetCenter().y - GetChild("enemy2")->GetCenter().y, GetChild("player")->GetCenter().x - GetChild("enemy2")->GetCenter().x)) < 180)
 				{
 					cout << "Close range\n";
-					i.second->Update(true);
+					i.second->Update(true, *(m_objects[1].second->GetDst()));
+					//i.second->Update(true);
 					const std::string& key = m_objects[1].first;
 					GameObject* object = m_objects[1].second;
 
 					if (key == "player") {
 						Player* player = dynamic_cast<Player*>(object);
 						if (player) {
-							player->Take_Damage();
+							//player->Take_Damage(); //dont damage this way. attack using projectile
 						}
 					}
 				}
@@ -219,6 +222,7 @@ void GameState::Enter()
 	TEMA::Load("../Assets/img/Tile.png", "tiles");
 	TEMA::Load("../Assets/img/Player.png", "player");
 	TEMA::Load("../Assets/img/Player.png", "enemy");
+	TEMA::Load("../Assets/img/enemy-projectile.bmp", "enemyProjectile");
 	SOMA::Load("../Assets/aud/play.ogg", "music", SOUND_MUSIC);
 	SOMA::Load("../Assets/aud/move.wav", "move", SOUND_SFX);
 
@@ -255,7 +259,7 @@ void GameState::Update()
 	}
 	if (EVMA::KeyPressed(SDL_SCANCODE_V))
 	{
-		if (GetChild("enemy1") != nullptr)
+		if (GetChild("enemy1") != nullptr)	//Combat Enemy
 		{
 			if (MAMA::Distance(GetChild("enemy1")->GetCenter(), GetChild("player")->GetCenter()) <= 30.0 &&
 				MAMA::Rad2Deg(MAMA::AngleBetweenPoints(GetChild("player")->GetCenter().y - GetChild("enemy1")->GetCenter().y, GetChild("player")->GetCenter().x - GetChild("enemy1")->GetCenter().x)) < 180)
@@ -269,7 +273,7 @@ void GameState::Update()
 			}
 		}
 
-		if (GetChild("enemy2") != nullptr)
+		if (GetChild("enemy2") != nullptr)	//RangedCombatEnemy
 		{
 			if (MAMA::Distance(GetChild("enemy2")->GetCenter(), GetChild("player")->GetCenter()) <= 30.0 &&
 				MAMA::Rad2Deg(MAMA::AngleBetweenPoints(GetChild("player")->GetCenter().y - GetChild("enemy2")->GetCenter().y, GetChild("player")->GetCenter().x - GetChild("enemy2")->GetCenter().x)) < 180)

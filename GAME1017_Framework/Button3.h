@@ -9,7 +9,8 @@ class Button3 : public Sprite
 public:
 	void Update();
 	void Render();
-
+	void Update(bool withinrange) {}
+	void Update(SDL_FRect& object1) {}
 protected:
 	std::string m_key;
 	enum BtnState { STATE_UP, STATE_OVER, STATE_DOWN } m_state; // enum defined locally.
@@ -23,8 +24,6 @@ private:
 	void Execute();
 public:
 	PlayButton(SDL_Rect src, SDL_FRect dst, const char* key);
-	void Update(bool withinrange) {}
-
 };
 
 #endif

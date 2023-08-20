@@ -115,6 +115,7 @@
     <ClCompile Include="DecisionTree.cpp">
       <Filter>_Main</Filter>
     </ClCompile>
+    <ClCompile Include="Projectile.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="GameObject.h">
@@ -222,6 +223,7 @@
     <ClInclude Include="DecisionTree.h">
       <Filter>_Main</Filter>
     </ClInclude>
+    <ClInclude Include="Projectile.h" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="..\Assets\img\Maga.png">

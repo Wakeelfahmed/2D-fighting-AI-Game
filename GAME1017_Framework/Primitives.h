@@ -43,6 +43,7 @@ public: // Public methods.
 	~Label();
 	void Update() {}
 	void Update(bool withinrange){}
+	void Update(bool Within_Close_Range, SDL_FRect& object1) {}
 	void Render();
 	const char* GetText() const { return m_string; }
 	void SetText(const char* c);
