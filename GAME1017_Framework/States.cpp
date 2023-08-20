@@ -62,7 +62,7 @@ void State::Update()
 					if (key == "player") {
 						Player* player = dynamic_cast<Player*>(object);
 						if (player) {
-							//player->Take_Damage(); //dont damage this way. attack using projectile
+							//player->Take_Damage(); //dont damage this way. attack using projectile test
 						}
 					}
 				}
