@@ -40,6 +40,8 @@ void State::Update()
 						Player* player = dynamic_cast<Player*>(object);
 						if (player) {
 							player->Take_Damage();
+
+							//SOMA::PlaySound("CombatEnemyhit");
 						}
 					}
 				}
@@ -48,27 +50,7 @@ void State::Update()
 			}
 		}
 		else if (i.first == "enemy2") {
-			if (GetChild("enemy2") != nullptr)	//RangedCombatEnemy
-			{
-				if (MAMA::Distance(GetChild("enemy2")->GetCenter(), GetChild("player")->GetCenter()) <= 30.0 &&
-					MAMA::Rad2Deg(MAMA::AngleBetweenPoints(GetChild("player")->GetCenter().y - GetChild("enemy2")->GetCenter().y, GetChild("player")->GetCenter().x - GetChild("enemy2")->GetCenter().x)) < 180)
-				{
-					//cout << "Close range\n";
-					i.second->Update();
-					//i.second->Update(true);
-					const std::string& key = m_objects[1].first;
-					GameObject* object = m_objects[1].second;
-
-					if (key == "player") {
-						Player* player = dynamic_cast<Player*>(object);
-						if (player) {
-							//player->Take_Damage(); //dont damage this way. attack using projectile test
-						}
-					}
-				}
-				else
-					i.second->Update();
-			}
+			i.second->Update();
 		}
 		else
 			i.second->Update();
@@ -225,6 +207,8 @@ void GameState::Enter()
 	TEMA::Load("../Assets/img/enemy-projectile.bmp", "enemyProjectile");
 	SOMA::Load("../Assets/aud/play.ogg", "music", SOUND_MUSIC);
 	SOMA::Load("../Assets/aud/move.wav", "move", SOUND_SFX);
+	SOMA::Load("../Assets/aud/Combat Enemy hit sound.mp3", "CombatEnemyhit", SOUND_SFX);
+	SOMA::Load("../Assets/aud/Range Enemy Projectile Shot.mp3", "RangeEnemyProjectile", SOUND_SFX);
 
 	AddChild("level", new TiledLevel(24, 32, 32, 32, "../Assets/dat/Tiledata.txt", "../Assets/dat/Level1.txt", "tiles"));
 	AddChild("player", new Player({ 0,256,128,128 }, { (float)(16) * 32, (float)(12) * 32.0f, 32.0f, 32.0f }, GetChild<TiledLevel*>("level")));
@@ -282,6 +266,15 @@ void GameState::Update()
 				MAMA::Rad2Deg(MAMA::AngleBetweenPoints(GetChild("player")->GetCenter().y - GetChild("enemy1")->GetCenter().y, GetChild("player")->GetCenter().x - GetChild("enemy1")->GetCenter().x)) < 180)
 			{
 				GetChild<Enemy*>("enemy1")->TakeDamage();
+				SOMA::PlaySound("CombatEnemyhit");
+
+				const std::string& key = m_objects[1].first;
+				GameObject* object = m_objects[1].second;
+				Player* player = dynamic_cast<Player*>(object);
+				if (player->get_AnimationState() != STATE_ATTACK) {
+					player->set_Animation(STATE_ATTACK);
+				}
+
 				if (GetChild<Enemy*>("enemy1")->GetHealth() <= 0)
 				{
 					RemoveChild("enemy1");
@@ -295,6 +288,13 @@ void GameState::Update()
 			if (MAMA::Distance(GetChild("enemy2")->GetCenter(), GetChild("player")->GetCenter()) <= 30.0 &&
 				MAMA::Rad2Deg(MAMA::AngleBetweenPoints(GetChild("player")->GetCenter().y - GetChild("enemy2")->GetCenter().y, GetChild("player")->GetCenter().x - GetChild("enemy2")->GetCenter().x)) < 180)
 			{
+				const std::string& key = m_objects[1].first;
+				GameObject* object = m_objects[1].second;
+				Player* player = dynamic_cast<Player*>(object);
+				if (player->get_AnimationState() != STATE_ATTACK) {
+					player->set_Animation(STATE_ATTACK);
+				}
+
 				GetChild<Enemy*>("enemy2")->TakeDamage();
 				if (GetChild<Enemy*>("enemy2")->GetHealth() <= 0)
 				{

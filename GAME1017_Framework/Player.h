@@ -4,6 +4,7 @@
 
 #include "GameObject.h"
 #include "TiledLevel.h"
+#include "SoundManager.h"
 
 class Player : public AnimatedSprite
 {
@@ -24,6 +25,11 @@ public:
 			already_detected = false;
 		}
 
+	}
+	void set_AnimationState(AnimState newm_state) { m_state = newm_state; }
+	AnimState get_AnimationState() const { return m_state; }
+	void set_Animation(AnimState STATE) {
+		SetAnimation(STATE, 4, 0, 4, 256 + 128);  // Adjust frames and duration
 	}
 private:
 	int m_health;

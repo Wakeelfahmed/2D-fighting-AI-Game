@@ -478,6 +478,7 @@ void RangedCombatEnemy::Attack()
 	}
 
 	mCurrentFrame = 0;  // Reset the frame count
+	SOMA::PlaySound("RangeEnemyProjectile");
 
 	Projectile* newProjectile;
 	newProjectile = new Projectile(REMA::GetRenderer(), m_projectileImagePath, m_dst.x + 128 / 2 - 70, m_dst.y + 5, 20, 20, 0, 200, true);

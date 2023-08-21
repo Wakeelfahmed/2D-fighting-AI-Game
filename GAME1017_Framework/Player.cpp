@@ -55,14 +55,53 @@ void Player::Update()
 		}
 		if (EVMA::KeyHeld(SDL_SCANCODE_A))
 		{
-			if (m_dst.x > 0  && !CheckCollision(-SPEED, 0.0))
+			if (m_dst.x > 0 && !CheckCollision(-SPEED, 0.0))
 			{
 				m_dst.x += -SPEED;
 			}
 		}
 		else if (EVMA::KeyHeld(SDL_SCANCODE_D))
 		{
-			if (m_dst.x < 1024 - 32 &&  !CheckCollision(SPEED, 0.0))
+			if (m_dst.x < 1024 - 32 && !CheckCollision(SPEED, 0.0))
+			{
+				m_dst.x += SPEED;
+			}
+		}
+		if (m_state == STATE_ATTACK)  // Check if 'v' key is held for melee
+			//if (EVMA::KeyHeld(SDL_SCANCODE_V))  // Check if 'v' key is held for melee
+		{
+			SetAnimation(AnimState::STATE_ATTACK, 4, 0, 4, 256 + 128);  // Adjust frames and duration
+		}
+		break;
+	case STATE_ATTACK:
+		if (EVMA::KeyReleased(SDL_SCANCODE_V))  // Release 'v' key to exit melee
+		{
+			SetAnimation(AnimState::STATE_IDLING, 1, 0, 1, 256);
+		}
+		if (EVMA::KeyHeld(SDL_SCANCODE_W))
+		{
+			if (m_dst.y > 0 && !CheckCollision(0.0, -SPEED))
+			{
+				m_dst.y += -SPEED;
+			}
+		}
+		else if (EVMA::KeyHeld(SDL_SCANCODE_S))
+		{
+			if (m_dst.y < 768 - 32 && !CheckCollision(0.0, SPEED))
+			{
+				m_dst.y += SPEED;
+			}
+		}
+		if (EVMA::KeyHeld(SDL_SCANCODE_A))
+		{
+			if (m_dst.x > 0 && !CheckCollision(-SPEED, 0.0))
+			{
+				m_dst.x += -SPEED;
+			}
+		}
+		else if (EVMA::KeyHeld(SDL_SCANCODE_D))
+		{
+			if (m_dst.x < 1024 - 32 && !CheckCollision(SPEED, 0.0))
 			{
 				m_dst.x += SPEED;
 			}
@@ -77,9 +116,9 @@ void Player::Update()
 void Player::Render()
 {
 	SDL_RenderCopyExF(REMA::GetRenderer(), TEMA::GetTexture("player"), GetSrc(), GetDst(), 0, 0, static_cast<SDL_RendererFlip>(m_dir));
-	SDL_SetRenderDrawColor(REMA::GetRenderer(), 255, 255, 255, 255 );
+	SDL_SetRenderDrawColor(REMA::GetRenderer(), 255, 255, 255, 255);
 	SDL_RenderDrawRectF(REMA::GetRenderer(), &m_healthDst);
-	if(m_health <= 10)
+	if (m_health <= 10)
 		SDL_SetRenderDrawColor(REMA::GetRenderer(), 255, 0, 0, 255);
 	else
 		SDL_SetRenderDrawColor(REMA::GetRenderer(), 0, 0, 255, 255);
