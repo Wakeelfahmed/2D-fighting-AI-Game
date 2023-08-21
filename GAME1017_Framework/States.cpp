@@ -23,8 +23,8 @@ void State::Update()
 {
 	for (auto const& i : m_objects)
 	{
-		if (i.first == "player")
-			cout << i.second->GetDst()->x << endl;
+		//if (i.first == "player")
+			//cout << i.second->GetDst()->x << endl;
 		if (i.first == "enemy1") {
 			if (GetChild("enemy1") != nullptr)	//CombatEnemy
 			{
@@ -53,8 +53,8 @@ void State::Update()
 				if (MAMA::Distance(GetChild("enemy2")->GetCenter(), GetChild("player")->GetCenter()) <= 30.0 &&
 					MAMA::Rad2Deg(MAMA::AngleBetweenPoints(GetChild("player")->GetCenter().y - GetChild("enemy2")->GetCenter().y, GetChild("player")->GetCenter().x - GetChild("enemy2")->GetCenter().x)) < 180)
 				{
-					cout << "Close range\n";
-					i.second->Update(true, *(m_objects[1].second->GetDst()));
+					//cout << "Close range\n";
+					i.second->Update();
 					//i.second->Update(true);
 					const std::string& key = m_objects[1].first;
 					GameObject* object = m_objects[1].second;
@@ -67,7 +67,7 @@ void State::Update()
 					}
 				}
 				else
-					i.second->Update(false);
+					i.second->Update();
 			}
 		}
 		else
@@ -232,6 +232,23 @@ void GameState::Enter()
 	AddChild("enemy1", new CloseCombatEnemy({ 0,0,128,128 }, { (float)(4) * 32, (float)(1) * 32.0f, 32.0f, 32.0f }, GetChild<TiledLevel*>("level"), 1));	//far one
 	AddChild("enemy2", new RangedCombatEnemy({ 0,0,128,128 }, { (float)(27) * 32, (float)(3) * 32.0f, 32.0f, 32.0f }, GetChild<TiledLevel*>("level"), 2));
 
+	const std::string& playerkey = m_objects[1].first;
+	GameObject* object = m_objects[1].second;
+
+	const std::string& enemykey = m_objects[4].first;
+	GameObject* enemyobject = m_objects[4].second;
+	//GameObject* enemy = m_objects[4].second;
+
+	if (enemykey == "enemy2") {
+		Player* player = dynamic_cast<Player*>(object);
+		Enemy* enemy = dynamic_cast<Enemy*>(enemyobject);
+		if (enemy) {
+			enemy->set_playerReference(player);
+			//player->Take_Damage();
+		}
+	}
+
+	//GetChild("enemy2"). 
 	m_enemyCounter = 2;
 
 	SOMA::PlayMusic("music");

@@ -254,6 +254,8 @@ void Enemy::SetActionState(ActionState action)
 	m_action = action;
 }
 
+void Enemy::set_playerReference(Player* Player) { playerReference = Player; }
+
 CloseCombatEnemy::CloseCombatEnemy(SDL_Rect s, SDL_FRect d, TiledLevel* level, int startingpath)
 	: Enemy(s, d, level, startingpath)
 {
@@ -313,7 +315,80 @@ RangedCombatEnemy::RangedCombatEnemy(SDL_Rect s, SDL_FRect d, TiledLevel* level,
 	BuildTree();
 	SetAnimation(AnimState::STATE_IDLING, 1, 0, 1, 0);
 }
-void RangedCombatEnemy::Update(bool Within_Close_Range, SDL_FRect& object1)
+//void RangedCombatEnemy::Update(bool withinrange) {
+//	std::cout << playerReference->GetDst()->x << std::endl;
+//
+//	m_healthDst = { m_dst.x,m_dst.y - 10,32,7 };
+//	m_curHealthDst = { m_dst.x + 1,m_dst.y - 9,static_cast<float>(m_health),5 };
+//	if (EVMA::KeyPressed(SDL_SCANCODE_T))
+//	{
+//		m_isIdling = !m_isIdling;
+//		GetTree()->GetIdleNode()->SetIsIdle(m_isIdling);
+//	}
+//
+//	SDL_FRect* target = STMA::GetStates().front()->GetChild("player")->GetDst();
+//	SDL_FPoint targetCenter = STMA::GetStates().front()->GetChild("player")->GetCenter();
+//	std::vector<Tile*>& obsOrig = STMA::GetStates().front()->GetChild<TiledLevel*>("level")->GetObstacles();
+//	std::vector<Tile*> obstacles;
+//	// Add only obstacles that are between player and target.
+//	double targetDist = MAMA::Distance(GetCenter(), targetCenter);
+//	for (auto obstacle : obsOrig)
+//	{
+//		double obsDist = MAMA::Distance(GetCenter(), obstacle->GetCenter());
+//		if (obsDist < targetDist)
+//			obstacles.push_back(obstacle);
+//	}
+//	double angle = MAMA::AngleBetweenPoints(targetCenter.y - GetCenter().y,
+//		targetCenter.x - GetCenter().x);
+//	m_losRay = { static_cast<float>(GetCenter().x + MAMA::SetDeltaX(angle, 300.0)),
+//	static_cast<float>(GetCenter().y + MAMA::SetDeltaY(angle, 300.0)) };
+//	if (COMA::LOSCheck(GetCenter(), m_losRay, target, obstacles)) {
+//		m_hasLOS = true;
+//		GetTree()->GetLOSNode()->SetHasLOS(m_hasLOS);
+//	}
+//	else {
+//		m_hasLOS = false;
+//		GetTree()->GetLOSNode()->SetHasLOS(m_hasLOS);
+//	}
+//
+//	if (m_health > 7)
+//		GetTree()->GetHealthNode()->SetOkHealth(1);
+//	else
+//		GetTree()->GetHealthNode()->SetOkHealth(0);
+//	if (m_health < 30)
+//		GetTree()->GetHurtNode()->SetIsHurt(1);
+//	else
+//		GetTree()->GetHurtNode()->SetIsHurt(0);
+//
+//	if (MAMA::Distance(m_dst.x, target->x, m_dst.y, target->y) <= m_detectionRad) {
+//		m_isDetected = true;
+//		GetTree()->GetDetectNode()->SetHasDetected(m_isDetected);
+//		GetTree()->GetRangeNode()->SetWithinRange(1);
+//	}
+//	else {
+//		m_isDetected = false;
+//		GetTree()->GetRangeNode()->SetWithinRange(0);
+//		GetTree()->GetDetectNode()->SetHasDetected(m_isDetected);
+//	}
+//
+//	for (int i = 0; i < mProjectiles.size(); i++) {
+//		if (mProjectiles[i]->get_shouldBeDestroyed()) {
+//			Projectile* pr = mProjectiles[i];
+//			mProjectiles.erase(mProjectiles.begin() + i);
+//			delete pr;
+//			i--;
+//		}
+//		else {
+//			mProjectiles[i]->update(m_frame);
+//		}
+//		mProjectiles[i]->checkCollision(*playerReference->GetDst());
+//		//mProjectiles[i]->CheckCollision(playerReference->GetDst());
+//	}
+//	// Make decision.
+//	GetTree()->MakeDecision();
+//	Animate();
+//}
+void RangedCombatEnemy::Update()
 {
 	m_healthDst = { m_dst.x,m_dst.y - 10,32,7 };
 	m_curHealthDst = { m_dst.x + 1,m_dst.y - 9,static_cast<float>(m_health),5 };
@@ -348,7 +423,6 @@ void RangedCombatEnemy::Update(bool Within_Close_Range, SDL_FRect& object1)
 		GetTree()->GetLOSNode()->SetHasLOS(m_hasLOS);
 	}
 
-	GetTree()->GetRangeNode()->SetWithinRange(Within_Close_Range);
 	if (m_health > 7)
 		GetTree()->GetHealthNode()->SetOkHealth(1);
 	else
@@ -361,16 +435,16 @@ void RangedCombatEnemy::Update(bool Within_Close_Range, SDL_FRect& object1)
 	if (MAMA::Distance(m_dst.x, target->x, m_dst.y, target->y) <= m_detectionRad) {
 		m_isDetected = true;
 		GetTree()->GetDetectNode()->SetHasDetected(m_isDetected);
+		GetTree()->GetRangeNode()->SetWithinRange(1);
 	}
 	else {
 		m_isDetected = false;
 		GetTree()->GetDetectNode()->SetHasDetected(m_isDetected);
+		GetTree()->GetRangeNode()->SetWithinRange(0);//now
 	}
-	/*for (int i = 0; i < mProjectiles.size(); i++) {
-		mProjectiles[i]->update(m_frame);
-	}*/
+
 	for (int i = 0; i < mProjectiles.size(); i++) {
-		if (mProjectiles[i]->shouldBeDestroyed()) {
+		if (mProjectiles[i]->get_shouldBeDestroyed()) {
 			Projectile* pr = mProjectiles[i];
 			mProjectiles.erase(mProjectiles.begin() + i);
 			delete pr;
@@ -380,10 +454,17 @@ void RangedCombatEnemy::Update(bool Within_Close_Range, SDL_FRect& object1)
 			mProjectiles[i]->update(m_frame);
 		}
 	}
-	// Make decision.
-	GetTree()->MakeDecision();
+	for (int i = 0; i < mProjectiles.size(); i++) {
+		if (mProjectiles[i]->checkCollision(*playerReference->GetDst())) {
+			mProjectiles[i]->set_shouldBeDestroyed(1);
+			playerReference->Take_Damage();
+			playerReference->Take_Damage();
+		}
+	}
+	GetTree()->MakeDecision();	// Make decision
 	Animate();
 }
+
 void RangedCombatEnemy::Attack()
 {
 	if (GetActionState() != ActionState::ATTACK_STATE) // If current action is not attack
@@ -400,79 +481,8 @@ void RangedCombatEnemy::Attack()
 
 	Projectile* newProjectile;
 	newProjectile = new Projectile(REMA::GetRenderer(), m_projectileImagePath, m_dst.x + 128 / 2 - 70, m_dst.y + 5, 20, 20, 0, 200, true);
-	newProjectile->setTargetPosition(500, 500);
+	newProjectile->setTargetPosition(playerReference->GetDst()->x, playerReference->GetDst()->y);
 	mProjectiles.push_back(newProjectile);
-}
-
-void RangedCombatEnemy::Update(bool withinrange) {
-	m_healthDst = { m_dst.x,m_dst.y - 10,32,7 };
-	m_curHealthDst = { m_dst.x + 1,m_dst.y - 9,static_cast<float>(m_health),5 };
-	if (EVMA::KeyPressed(SDL_SCANCODE_T))
-	{
-		m_isIdling = !m_isIdling;
-		GetTree()->GetIdleNode()->SetIsIdle(m_isIdling);
-	}
-
-	SDL_FRect* target = STMA::GetStates().front()->GetChild("player")->GetDst();
-	SDL_FPoint targetCenter = STMA::GetStates().front()->GetChild("player")->GetCenter();
-	std::vector<Tile*>& obsOrig = STMA::GetStates().front()->GetChild<TiledLevel*>("level")->GetObstacles();
-	std::vector<Tile*> obstacles;
-	// Add only obstacles that are between player and target.
-	double targetDist = MAMA::Distance(GetCenter(), targetCenter);
-	for (auto obstacle : obsOrig)
-	{
-		double obsDist = MAMA::Distance(GetCenter(), obstacle->GetCenter());
-		if (obsDist < targetDist)
-			obstacles.push_back(obstacle);
-	}
-	double angle = MAMA::AngleBetweenPoints(targetCenter.y - GetCenter().y,
-		targetCenter.x - GetCenter().x);
-	m_losRay = { static_cast<float>(GetCenter().x + MAMA::SetDeltaX(angle, 300.0)),
-	static_cast<float>(GetCenter().y + MAMA::SetDeltaY(angle, 300.0)) };
-	if (COMA::LOSCheck(GetCenter(), m_losRay, target, obstacles)) {
-		m_hasLOS = true;
-		GetTree()->GetLOSNode()->SetHasLOS(m_hasLOS);
-	}
-	else {
-		m_hasLOS = false;
-		GetTree()->GetLOSNode()->SetHasLOS(m_hasLOS);
-	}
-
-	GetTree()->GetRangeNode()->SetWithinRange(withinrange);
-	if (m_health > 7)
-		GetTree()->GetHealthNode()->SetOkHealth(1);
-	else
-		GetTree()->GetHealthNode()->SetOkHealth(0);
-	if (m_health < 30)
-		GetTree()->GetHurtNode()->SetIsHurt(1);
-	else
-		GetTree()->GetHurtNode()->SetIsHurt(0);
-
-	if (MAMA::Distance(m_dst.x, target->x, m_dst.y, target->y) <= m_detectionRad) {
-		m_isDetected = true;
-		GetTree()->GetDetectNode()->SetHasDetected(m_isDetected);
-	}
-	else {
-		m_isDetected = false;
-		GetTree()->GetDetectNode()->SetHasDetected(m_isDetected);
-	}
-	/*for (int i = 0; i < mProjectiles.size(); i++) {
-		mProjectiles[i]->update(m_frame);
-	}*/
-	for (int i = 0; i < mProjectiles.size(); i++) {
-		if (mProjectiles[i]->shouldBeDestroyed()) {
-			Projectile* pr = mProjectiles[i];
-			mProjectiles.erase(mProjectiles.begin() + i);
-			delete pr;
-			i--;
-		}
-		else {
-			mProjectiles[i]->update(m_frame);
-		}
-	}
-	// Make decision.
-	GetTree()->MakeDecision();
-	Animate();
 }
 void RangedCombatEnemy::BuildTree()
 {

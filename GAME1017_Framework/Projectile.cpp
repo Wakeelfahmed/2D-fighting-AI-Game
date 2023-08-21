@@ -34,10 +34,11 @@ void Projectile::setTargetPosition(float targetX, float targetY) {
 	mVelocityX = directionX * 1;//mProjectileSpeed;
 	mVelocityY = directionY * 1; //mProjectileSpeed;
 }
-bool Projectile::shouldBeDestroyed()
+bool Projectile::get_shouldBeDestroyed()
 {
 	return mShouldBeDestroyed;
 }
+void Projectile::set_shouldBeDestroyed(bool newbool) { mShouldBeDestroyed = newbool; }
 void Projectile::update(float deltaTime)
 {
 	mX += mVelocityX * deltaTime;
@@ -59,5 +60,13 @@ bool Projectile::checkCollision(SDL_Rect& otherRect)
 {
 	SDL_Rect myRect = { (int)mX, (int)mY, (int)mWidth, (int)mHeight };
 	return SDL_HasIntersection(&myRect, &otherRect);
+}
+bool Projectile::checkCollision(SDL_FRect& otherRect)
+{
+	//SDL_FRect myRect = { (int)mX, (int)mY, (int)mWidth, (int)mHeight };
+	SDL_Rect myRect = { static_cast<int>(mX), static_cast<int>(mY), static_cast<int>(mWidth), static_cast<int>(mHeight) };
+	SDL_Rect rectToCheck = { static_cast<int>(otherRect.x), static_cast<int>(otherRect.y), static_cast<int>(otherRect.w), static_cast<int>(otherRect.h) };
+
+	return SDL_HasIntersection(&myRect, &rectToCheck);
 }
 bool Projectile::isOwnedByPlayer() { return mIsOwnedByPlayer; }

@@ -6,7 +6,7 @@
 #include "TiledLevel.h" // Could forward declare but TiledLevel.h doesn't include Enemy.h
 #include "ActionNode.h" // ActionState in here.
 #include"Projectile.h" // ActionState in here.
-
+#include "Player.h"
 class DecisionTree; // Forward declaration.
 
 class Enemy : public AnimatedSprite
@@ -17,7 +17,7 @@ public:
 	Enemy(SDL_Rect s, SDL_FRect d, TiledLevel* level, int startingpath);
 	void virtual Update() {}
 	void virtual Update(bool Within_Close_Range);
-	void virtual Update(bool Within_Close_Range, SDL_FRect& object1){}
+	void virtual Update(bool Within_Close_Range, SDL_FRect& object1) {}
 	void Render();
 	void SetDebugView() { m_isDebuging = !m_isDebuging; }
 	// Action methods. Fill in for lab.
@@ -44,12 +44,13 @@ public:
 	/*void set_Close_Range(bool Close_range) {
 		GetTree()->GetRangeNode()->SetWithinRange(Close_range);
 	}*/
+	void set_playerReference(Player* Player);
 protected:
+	Player* playerReference;
 	std::vector<Projectile*> mProjectiles;
 	SDL_Texture* m_projTexture;
 	float m_projectileShootTimer;
 	const char* m_projectileImagePath = "../Assets/img/enemy-projectile.bmp";
-
 	DecisionTree* m_tree;
 	bool m_isIdling,
 		m_isDebuging,
@@ -85,8 +86,9 @@ private:
 class RangedCombatEnemy : public Enemy
 {
 public:
-	void Update(bool Within_Close_Range);
-	void Update(bool Within_Close_Range, SDL_FRect& object1);
+	void Update();
+	void Update(bool Within_Close_Range) {}
+	void Update(bool Within_Close_Range, SDL_FRect& object1) {}
 	RangedCombatEnemy(SDL_Rect s, SDL_FRect d, TiledLevel* level, int startingpath);
 	void Attack();
 private:
