@@ -21,7 +21,7 @@ public:
 	template <class T>
 	T GetChild(const std::string& key);
 	void RemoveChild(const std::string& key);
-	
+
 protected: // Private but inherited.
 	std::vector<std::pair<std::string, GameObject*>> m_objects;
 	State() = default;
@@ -59,7 +59,27 @@ public:
 	void Exit();
 	void Resume();
 private:
-	int m_enemyCounter;
+	int m_enemyCounter;	bool win_or_loss = false;
 	std::vector<Projectile*> m_pProjectiles;
+};
+
+class WinState : public State
+{
+public:
+	WinState();
+	void Enter();
+	void Update();
+	void Render();
+	void Exit();
+};
+
+class LoseState : public State
+{
+public:
+	LoseState();
+	void Enter();
+	void Update();
+	void Render();
+	void Exit();
 };
 #endif

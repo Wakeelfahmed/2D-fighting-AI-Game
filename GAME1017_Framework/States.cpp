@@ -21,10 +21,9 @@ using namespace std;
 
 void State::Update()
 {
+	static int mCurrentFrame = 0;
 	for (auto const& i : m_objects)
 	{
-		//if (i.first == "player")
-			//cout << i.second->GetDst()->x << endl;
 		if (i.first == "enemy1") {
 			if (GetChild("enemy1") != nullptr)	//CombatEnemy
 			{
@@ -39,6 +38,11 @@ void State::Update()
 					if (key == "player") {
 						Player* player = dynamic_cast<Player*>(object);
 						if (player) {
+							if (mCurrentFrame < 50) {
+								mCurrentFrame++;  // Increment the frame count
+								return;  // Wait until the attack delay frames have passed
+							}
+							mCurrentFrame = 0;  // Reset the frame count
 							player->Take_Damage();
 
 							//SOMA::PlaySound("CombatEnemyhit");
@@ -221,18 +225,15 @@ void GameState::Enter()
 
 	const std::string& enemykey = m_objects[4].first;
 	GameObject* enemyobject = m_objects[4].second;
-	//GameObject* enemy = m_objects[4].second;
 
 	if (enemykey == "enemy2") {
 		Player* player = dynamic_cast<Player*>(object);
 		Enemy* enemy = dynamic_cast<Enemy*>(enemyobject);
 		if (enemy) {
 			enemy->set_playerReference(player);
-			//player->Take_Damage();
 		}
 	}
 
-	//GetChild("enemy2"). 
 	m_enemyCounter = 2;
 
 	SOMA::PlayMusic("music");
@@ -251,6 +252,23 @@ void GameState::Update()
 	{
 		SOMA::PauseMusic();
 		STMA::PushState(new PauseState()); // Add new PauseState
+		return;
+	}
+	const std::string& key = m_objects[1].first;
+	GameObject* object = m_objects[1].second;
+	Player* player = dynamic_cast<Player*>(object);
+	if (player->get_health() < 0)
+	{
+		win_or_loss = 1;
+		SOMA::PauseMusic();
+		STMA::PushState(new LoseState()); // Add new PauseState
+		return;
+	}
+	else if (m_enemyCounter == 0)
+	{
+		win_or_loss = 1;
+		SOMA::PauseMusic();
+		STMA::PushState(new WinState()); // Add new PauseState
 		return;
 	}
 	else if (EVMA::KeyPressed(SDL_SCANCODE_GRAVE)) // ~ or ` key. Toggle debug mode.
@@ -272,7 +290,7 @@ void GameState::Update()
 				GameObject* object = m_objects[1].second;
 				Player* player = dynamic_cast<Player*>(object);
 				if (player->get_AnimationState() != STATE_ATTACK) {
-					player->set_Animation(STATE_ATTACK);
+					player->set_Animation(STATE_ATTACK, 4, 1, 4, 128);
 				}
 
 				if (GetChild<Enemy*>("enemy1")->GetHealth() <= 0)
@@ -292,7 +310,7 @@ void GameState::Update()
 				GameObject* object = m_objects[1].second;
 				Player* player = dynamic_cast<Player*>(object);
 				if (player->get_AnimationState() != STATE_ATTACK) {
-					player->set_Animation(STATE_ATTACK);
+					player->set_Animation(STATE_ATTACK, 4, 1, 4, 128);
 				}
 
 				GetChild<Enemy*>("enemy2")->TakeDamage();
@@ -330,6 +348,99 @@ void GameState::Exit()
 void GameState::Resume()
 {
 	cout << "Resuming GameState..." << endl;
+	if (win_or_loss) {
+		win_or_loss = 0;
+		m_enemyCounter = 2;
+		RemoveChild("enemy1");
+		RemoveChild("enemy2");
+		AddChild("enemy1", new CloseCombatEnemy({ 0,0,128,128 }, { (float)(4) * 32, (float)(1) * 32.0f, 32.0f, 32.0f }, GetChild<TiledLevel*>("level"), 1));	//far one
+		AddChild("enemy2", new RangedCombatEnemy({ 0,0,128,128 }, { (float)(27) * 32, (float)(3) * 32.0f, 32.0f, 32.0f }, GetChild<TiledLevel*>("level"), 2));
+		const std::string& playerkey = m_objects[1].first;
+		GameObject* object = m_objects[1].second;
+
+		const std::string& enemykey = m_objects[4].first;
+		GameObject* enemyobject = m_objects[4].second;
+
+		Player* player = dynamic_cast<Player*>(object);
+		if (enemykey == "enemy2") {
+			Enemy* enemy = dynamic_cast<Enemy*>(enemyobject);
+			if (enemy) {
+				enemy->set_playerReference(player);
+			}
+			player->set_Animation(AnimState::STATE_IDLING, 1, 0, 1, 256);
+		}
+		player->set_health(30);
+	}
 	SOMA::ResumeMusic();
 }
 // End GameState
+
+// Begin PauseState.
+WinState::WinState() = default;
+void WinState::Enter()
+{
+	//kWidth = 1024;
+	//kHeight = 768;
+	cout << "Entering WinState..." << endl;
+	AddChild("WinText", new Label("ltype24", 450, (768 / 2) - 40, "You Won!"));
+	AddChild("pauseText", new Label("ltype24", 370, 768 / 2, "press R to Play Again"));
+}
+void WinState::Update()
+{
+	if (EVMA::KeyPressed(SDL_SCANCODE_R))
+	{
+		STMA::PopState();
+		return;
+	}
+	State::Update();
+}
+void WinState::Render()
+{
+	// First render the GameState
+	STMA::GetStates().front()->Render();
+	// Now render rest of PauseState
+	SDL_SetRenderDrawColor(REMA::GetRenderer(), 0, 0, 255, 128);
+	SDL_Rect rect = { 256, 128, 512, 512 };
+	SDL_RenderFillRect(REMA::GetRenderer(), &rect);
+	State::Render();
+}
+void WinState::Exit()
+{
+	cout << "Exiting WinState..." << endl;
+	State::Exit();
+}
+// End PauseState.
+
+// Begin PauseState.
+LoseState::LoseState() = default;
+void LoseState::Enter()
+{
+	cout << "Entering LoseState..." << endl;
+	AddChild("LoseText", new Label("ltype24", 450, (768 / 2) - 40, "Game Over!"));
+	AddChild("restartText", new Label("ltype24", 370, 768 / 2, "press R to Restart"));
+}
+void LoseState::Update()
+{
+	if (EVMA::KeyPressed(SDL_SCANCODE_R))
+	{
+		STMA::PopState();
+		return;
+	}
+	State::Update();
+}
+void LoseState::Render()
+{
+	// First render the GameState
+	STMA::GetStates().front()->Render();
+	// Now render rest of PauseState
+	SDL_SetRenderDrawColor(REMA::GetRenderer(), 0, 0, 255, 128);
+	SDL_Rect rect = { 256, 128, 512, 512 };
+	SDL_RenderFillRect(REMA::GetRenderer(), &rect);
+	State::Render();
+}
+void LoseState::Exit()
+{
+	cout << "Exiting LoseState..." << endl;
+	State::Exit();
+}
+// End PauseState.

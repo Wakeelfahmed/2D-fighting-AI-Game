@@ -132,7 +132,7 @@ void Enemy::Attack() {
 		SetAnimation(AnimState::STATE_ATTACK, 4, 1, 4, 128);
 	}
 }
-void Enemy::Flee()
+void RangedCombatEnemy::Flee()
 {
 	if (GetActionState() != ActionState::PATROL_STATE) // If current action is not idle
 	{
@@ -156,8 +156,17 @@ void Enemy::Flee()
 	// Check if the enemy is beyond the screen bounds
 	if (m_dst.x < -m_dst.w || m_dst.x > kWidth || m_dst.y < -m_dst.h || m_dst.y > kHeight)
 	{
-		SetEnabled(false);	// Disable the enemy
+		//SetEnabled(false);	// Disable the enemy
+		Fleed_the_scene = true;
+		//RangedCombatEnemy({ 0,0,128,128 }, { (float)(27) * 32, (float)(3) * 32.0f, 32.0f, 32.0f })
+		//ResetEnemy();
 	}
+}
+void RangedCombatEnemy::ResetEnemy()
+{
+	m_dst = { (float)(27) * 32, (float)(3) * 32.0f, 32.0f, 32.0f };
+	m_isIdling = false;	m_isDebuging = false;	m_hasLOS = false;	m_isDetected = false;
+	m_health = 30; 
 }
 void Enemy::MoveToRange() {
 	if (GetActionState() != ActionState::PATROL_STATE) // If current action is not idle
@@ -390,6 +399,15 @@ RangedCombatEnemy::RangedCombatEnemy(SDL_Rect s, SDL_FRect d, TiledLevel* level,
 //}
 void RangedCombatEnemy::Update()
 {
+	if (Fleed_the_scene) {
+		if (mCurrentFrame < 50) {
+			mCurrentFrame++;  // Increment the frame count
+			return;  // Wait until the attack delay frames have passed
+		}
+		Fleed_the_scene = 0;
+		ResetEnemy();	m_health = 30;
+		mCurrentFrame = 0;  // Reset the frame count
+	}
 	m_healthDst = { m_dst.x,m_dst.y - 10,32,7 };
 	m_curHealthDst = { m_dst.x + 1,m_dst.y - 9,static_cast<float>(m_health),5 };
 	if (EVMA::KeyPressed(SDL_SCANCODE_T))

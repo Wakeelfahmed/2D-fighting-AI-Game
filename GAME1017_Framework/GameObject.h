@@ -17,7 +17,6 @@ public:
 	const bool GetEnabled() const;
 	void SetEnabled(const bool e);
 	void SetDst(const SDL_FRect dst);
-
 protected: // private but inherited.
 	SDL_FRect m_dst;
 	bool m_enabled;
@@ -32,7 +31,7 @@ public:
 	virtual void Update() = 0;
 	virtual void Render() = 0;
 	void Update(bool Within_Close_Range, SDL_FRect& object1) {}
-
+	void set_m_src(SDL_Rect newSDL_Rect) { m_src = newSDL_Rect; }
 protected:
 	SDL_Rect m_src;
 	Sprite(const SDL_Rect src, const SDL_FRect dst);

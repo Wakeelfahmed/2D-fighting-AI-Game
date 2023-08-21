@@ -24,9 +24,8 @@ public:
 	void Idle();
 	void Patrol();
 	void MoveToRange();
+	void virtual Flee() {}
 	void virtual Attack();
-	//void virtual Attack();
-	void Flee();
 	bool CheckCollision(const double dX, const double dY);
 	bool GetDir() { return m_dir; }
 	int GetHealth() { return m_health; }
@@ -91,11 +90,13 @@ public:
 	void Update(bool Within_Close_Range, SDL_FRect& object1) {}
 	RangedCombatEnemy(SDL_Rect s, SDL_FRect d, TiledLevel* level, int startingpath);
 	void Attack();
+	void Flee();
+	void ResetEnemy();
 private:
 	void BuildTree();
 	int mFramesTowait = 10;  // Number of frames to wait before destruction
 	int mCurrentFrame;
-
+	bool Fleed_the_scene = false;
 };
 
 #endif
