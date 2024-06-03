@@ -265,3 +265,6 @@ __pycache__/
 /GAME1017_Framework/x64/Debug/GAME1017.eeb103f7.tlog/link.command.1.tlog
 /GAME1017_Framework/x64/Debug/GAME1017.eeb103f7.tlog/link.read.1.tlog
 /GAME1017_Framework/x64/Debug/GAME1017.eeb103f7.tlog/link.write.1.tlog
+/GAME1017_Framework/x64/Debug/enemy.obj.enc
+/GAME1017_Framework/x64/Debug/states.obj.enc
+/GAME1017_Framework/GAME1017_Framework.vcxproj.filters
